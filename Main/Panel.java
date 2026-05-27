@@ -1,6 +1,5 @@
 package Main;
-import ControlPanel.KeyInputHandler;
-import ControlPanel.MouseHandler;
+import ControlPanel.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -11,8 +10,8 @@ public class Panel extends JPanel {
     
     private final int screenWidth = 650, screenHeight = 700;
     private UI ui = new UI(this);
-    private KeyInputHandler keyH = new KeyInputHandler(this, ui);
     private MouseHandler mouse = new MouseHandler(this, ui);
+    private KeyInputHandler keyH = new KeyInputHandler(this, ui);
 
     public Panel(){
 
@@ -26,6 +25,13 @@ public class Panel extends JPanel {
         
         this.setFocusable(true);
         this.requestFocusInWindow();
+    }
+
+    public void exitInquiry(){
+
+        if(!ui.exit){ui.exit = true;}
+        else{ui.exit = false;}  
+        repaint();
     }
 
     @Override
