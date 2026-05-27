@@ -26,7 +26,7 @@ public class KeyInputHandler implements KeyListener {
         int code = e.getKeyCode();
 
         if(code == KeyEvent.VK_ESCAPE){
-            ui.exitInquiry();
+            panel.exitInquiry();
         }
     }
 

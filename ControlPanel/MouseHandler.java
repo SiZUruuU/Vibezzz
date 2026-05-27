@@ -28,13 +28,11 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
         int y = e.getY();
 
         if(ui.exit){
-            // Use the Rectangles we created in the UI class!
-            if(ui.yesButtonBounds.contains(x, y)){
-                System.exit(0);
-            }
-            else if(ui.noButtonBounds.contains(x, y)){
-                ui.exit = false;
-                panel.repaint();
+            for (ButtonManager button : ui.getBackendButtons()) {
+                if (button.collisionCheck(x, y)) {
+                    button.execute();
+                    break;
+                }
             }
         }
     }

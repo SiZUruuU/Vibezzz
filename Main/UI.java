@@ -1,12 +1,20 @@
 package Main;
 
 import java.awt.*;
+import java.util.ArrayList;
+
+import ControlPanel.ButtonManager;
+import ControlPanel.ExitButton;
 
 public class UI {
 
     Panel panel;
     Graphics2D g2;
     public boolean exit = false;
+    int exitX = 265, exitY = 355, exitW = 40, exitH = 20;
+
+    //Arraylist for backend button coordinates
+    private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
 
     // Added hitboxes for the buttons
     public Rectangle yesButtonBounds = new Rectangle(0, 0, 0, 0);
@@ -14,6 +22,12 @@ public class UI {
 
     public UI(Panel panel){
         this.panel = panel;
+
+        backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this));
+    }
+
+    public ArrayList<ButtonManager> getBackendButtons() {
+        return backEndButtons;
     }
 
     public void draw(Graphics2D g2){
@@ -25,14 +39,6 @@ public class UI {
 
     public void imageDraw(Graphics2D g2){
 
-    }
-
-    public void exitInquiry(){
-
-        if(!exit){exit = true;}
-        else{exit = false;}
-        
-        panel.repaint();
     }
 
     public void drawExitInquiry(Graphics2D g2){
