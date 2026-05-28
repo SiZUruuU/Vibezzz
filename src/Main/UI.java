@@ -1,11 +1,12 @@
 package Main;
 
-import java.awt.*;
-import java.util.ArrayList;         
-import javax.swing.ImageIcon;
-
-import ControlPanel.ButtonManager;  
+import ControlPanel.AudioEngine;
+import ControlPanel.ButtonManager;
 import ControlPanel.ExitButton;     
+import ControlPanel.MusicHandler;
+import java.awt.*;
+import java.util.ArrayList;
+import javax.swing.ImageIcon;
 
 public class UI {
 
@@ -20,6 +21,14 @@ public class UI {
     private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
     public Rectangle yesButtonBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle noButtonBounds = new Rectangle(0, 0, 0, 0);
+
+    public Rectangle playPauseBounds = new Rectangle(0, 0, 0, 0);
+    public Rectangle skipFwdBounds = new Rectangle(0, 0, 0, 0);
+    public Rectangle skipBackBounds = new Rectangle(0, 0, 0, 0);
+    
+    public AudioEngine audioEngine = new AudioEngine();
+    public MusicHandler musicHandler = new MusicHandler();
+    public int currentSongIndex = 0;
 
     //  ASSETS 
     private Image iconLibrary, iconAlbum, iconArtist, iconSong;
@@ -234,9 +243,22 @@ public class UI {
         for (int i = 0; i < controls.length; i++) {
             if (controls[i] != null) {
                 int cx = rightX + 25 + i * (iconWidth + spacing);
-                g2.drawImage(controls[i], cx, ctrlY, iconWidth, iconWidth, null);
+                
+                // Determine which icon to draw and set their invisible hitboxes
+                Image iconToDraw = controls[i];
+                
+                if (i == 2) { // The Play button is at index 2
+                    iconToDraw = audioEngine.isPlaying() ? iconPause : iconPlay;
+                    playPauseBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                } else if (i == 1) { // Skip Back is at index 1
+                    skipBackBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                } else if (i == 3) { // Skip Forward is at index 3
+                    skipFwdBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                }
+
+                g2.drawImage(iconToDraw, cx, ctrlY, iconWidth, iconWidth, null);
             }
-        }
+        }   
     }
 
     //  EXIT POPUP 
