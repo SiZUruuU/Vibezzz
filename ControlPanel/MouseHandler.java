@@ -23,16 +23,24 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
         int x = e.getX();
         int y = e.getY();
 
-        if(ui.exit){
-            for (ButtonManager button : ui.getBackendButtons()) {
-                if (button.collisionCheck(x, y)) {
-                    button.execute();
-                    break;
-                }
+        if (ui.exit) {
+            // Check the Yes and No button bounds directly
+            if (ui.yesButtonBounds.contains(x, y)) {
+                System.exit(0);
+            } else if (ui.noButtonBounds.contains(x, y)) {
+                panel.exitInquiry(); // This toggles exit to false and closes the popup
+            }
+            return; // Stop checking other buttons if the popup is active
+        }
+
+        // If not exiting, check normal backend buttons
+        for (ButtonManager button : ui.getBackendButtons()) {
+            if (button.collisionCheck(x, y)) {
+                button.execute();
+                break;
             }
         }
     }
