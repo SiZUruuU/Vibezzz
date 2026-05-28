@@ -61,7 +61,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             return;
         }
 
-// 3. Check Skip Forward Button
+        // 3. Check Skip Forward Button
         if (ui.skipFwdBounds.contains(x, y)) {
             if (!playlist.isEmpty()) {
                 if (ui.isRepeat) {
@@ -114,9 +114,17 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             return;
         }
 
+        // 7. Check Progress Bar Seek
+        if (ui.progressBarBounds.contains(x, y)) {
+            if (!playlist.isEmpty() && ui.audioEngine.isPlaying()) {
+                // Calculate percentage (0.0 to 1.0) based on where they clicked
+                double percentage = (double) (x - ui.progressBarBounds.x) / ui.progressBarBounds.width;
+                ui.audioEngine.seek(percentage);
+            }
+            return;
+        }
 
-
-        // 7. Check normal backend buttons
+        // 8. Check normal backend buttons
         if (!ui.exit) {
             for (ButtonManager button : ui.getBackendButtons()) {
                 if (button.collisionCheck(x, y)) {

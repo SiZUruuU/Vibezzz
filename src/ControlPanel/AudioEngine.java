@@ -17,12 +17,18 @@ public class AudioEngine {
 
     public void playTrack(String filePath) {
         try {
-            stopTrack(); // Clean up before starting a new track
-            
+            // Check if we are starting a completely new song
+            if (currentFilePath != null && !currentFilePath.equals(filePath)) {
+                pauseLocation = 0; // Reset completely for new songs
+            }
+
+            long tempPause = pauseLocation; // Save pause state before stopping
+            stopTrack(); 
+            pauseLocation = tempPause;      // Restore it!
+
             currentFilePath = filePath;
             fis = new FileInputStream(filePath);
             
-            // If we are resuming from a pause, skip to where we left off
             if (pauseLocation > 0) {
                 fis.skip(totalLength - pauseLocation);
             } else {
@@ -33,12 +39,9 @@ public class AudioEngine {
             player = new Player(bis);
             isPlaying = true;
 
-            // Run the audio player on a background thread so the UI doesn't freeze
             playerThread = new Thread(() -> {
                 try {
                     player.play();
-                    
-                    // When the song finishes naturally
                     if (player.isComplete()) {
                         isPlaying = false;
                         pauseLocation = 0;
@@ -47,11 +50,10 @@ public class AudioEngine {
                     System.out.println("Playback interrupted.");
                 }
             });
-            
             playerThread.start();
 
         } catch (Exception e) {
-            System.out.println("Error playing audio. Ensure the file is a valid MP3.");
+            System.out.println("Error playing audio.");
             e.printStackTrace();
         }
     }
@@ -59,14 +61,10 @@ public class AudioEngine {
     public void pauseTrack() {
         if (player != null && isPlaying) {
             try {
-                // Save the remaining bytes so we know where to resume
                 pauseLocation = fis.available(); 
                 player.close();
                 isPlaying = false;
-                
-                if (playerThread != null) {
-                    playerThread.interrupt();
-                }
+                if (playerThread != null) playerThread.interrupt();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -74,8 +72,6 @@ public class AudioEngine {
     }
 
     public void resumeTrack() {
-        // To resume in JLayer, we just play the track again. 
-        // The playTrack method handles skipping the bytes we already played.
         if (currentFilePath != null && !isPlaying) {
             playTrack(currentFilePath);
         }
@@ -86,14 +82,31 @@ public class AudioEngine {
             player.close();
             pauseLocation = 0;
             isPlaying = false;
-            
-            if (playerThread != null) {
-                playerThread.interrupt();
-            }
+            if (playerThread != null) playerThread.interrupt();
         }
     }
 
-    public boolean isPlaying() { 
-        return isPlaying; 
+    // --- NEW: Calculate current progress (0.0 to 1.0) ---
+    public double getProgress() {
+        if (fis == null || totalLength <= 0) return 0.0;
+        try {
+            return (double) (totalLength - fis.available()) / totalLength;
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
+
+    // --- NEW: Jump to a specific percentage of the song ---
+    public void seek(double percentage) {
+        if (currentFilePath == null || totalLength <= 0) return;
+        
+        percentage = Math.max(0.0, Math.min(1.0, percentage)); // Keep between 0 and 1
+        pauseLocation = (long) (totalLength * (1.0 - percentage));
+        
+        if (pauseLocation <= 0) pauseLocation = 1; // Prevent full reset
+        
+        playTrack(currentFilePath); // Replay from new location
+    }
+
+    public boolean isPlaying() { return isPlaying; }
 }

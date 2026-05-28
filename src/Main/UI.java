@@ -7,6 +7,7 @@ import ControlPanel.MusicHandler;
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
+import javax.swing.Timer;
 
 public class UI {
 
@@ -26,6 +27,7 @@ public class UI {
     public Rectangle skipBackBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle repeatBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle shuffleBounds = new Rectangle(0, 0, 0, 0);
+    public Rectangle progressBarBounds = new Rectangle(0, 0, 0, 0);
     
     public boolean isRepeat = false;
     public boolean isShuffle = false;
@@ -48,6 +50,15 @@ public class UI {
         backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this));
         
         loadAssets();
+
+
+        // --- NEW: Repaint loop for the progress bar ---
+        Timer timer = new Timer(50, e -> {
+            if (audioEngine.isPlaying()) {
+                panel.repaint();
+            }
+        });
+        timer.start();
     }
 
     
@@ -263,11 +274,19 @@ public class UI {
         int barW = artSize;
         int barX = artX;
         int barY = titleY + 36;
+        
+        // Set an invisible hitbox over the bar so the user can click it
+        progressBarBounds.setBounds(barX, barY - 10, barW, 24); 
+
         if (imgProgressBar != null) {
             g2.drawImage(imgProgressBar, barX, barY, barW, 4, null);
         }
+        
+        // Calculate dynamic knob position based on audio progress
+        double progress = audioEngine.getProgress();
+        int knobX = barX + (int)(barW * progress) - 6; 
+
         if (imgProgressKnob != null) {
-            int knobX = barX + (int)(barW * 0.30) - 6; 
             g2.drawImage(imgProgressKnob, knobX, barY - 4, 12, 12, null);
         }
 
