@@ -223,7 +223,30 @@ public class UI {
 
         int artSize = (int) (rightW * 0.76);
         int artX = rightX + (rightW - artSize) / 2;
+        int artY = playerY + 25; // Push it down slightly from the top of the container
         int titleY = playerY + (int)(playerH * 0.68);
+
+        // --- NEW: DRAW ALBUM ART ---
+        if (!musicHandler.getPlaylist().isEmpty()) {
+            String imgPath = musicHandler.getPlaylist().get(currentSongIndex).getImagePath();
+            
+            if (!imgPath.equals("NO_IMAGE")) {
+                // If the matched image exists, draw it!
+                Image albumCover = new ImageIcon(imgPath).getImage();
+                g2.drawImage(albumCover, artX, artY, artSize, artSize, null);
+            } else {
+                // Draw a sleek placeholder if the song has no matching image
+                g2.setColor(Color.decode("#1E1F22"));
+                g2.fillRoundRect(artX, artY, artSize, artSize, 20, 20);
+                
+                g2.setColor(Color.GRAY);
+                g2.setFont(new Font("Inter", Font.BOLD, 14));
+                FontMetrics fmNoCover = g2.getFontMetrics();
+                int textW = fmNoCover.stringWidth("No Cover");
+                g2.drawString("No Cover", artX + (artSize - textW) / 2, artY + (artSize / 2));
+            }
+        }
+
 
         g2.setFont(new Font("Inter", Font.BOLD, 16));
         FontMetrics fmTitle = g2.getFontMetrics();

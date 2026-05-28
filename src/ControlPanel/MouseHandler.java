@@ -61,11 +61,24 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             return;
         }
 
-        // 3. Check Skip Forward Button
+// 3. Check Skip Forward Button
         if (ui.skipFwdBounds.contains(x, y)) {
             if (!playlist.isEmpty()) {
-                // Math to safely loop back to 0 if we hit the end of the playlist
-                ui.currentSongIndex = (ui.currentSongIndex + 1) % playlist.size();
+                if (ui.isRepeat) {
+                    // Do nothing to the index; it will just replay the current song
+                } else if (ui.isShuffle) {
+                    // Pick a random index that isn't the currently playing one
+                    if (playlist.size() > 1) {
+                        int newIndex;
+                        do {
+                            newIndex = (int)(Math.random() * playlist.size());
+                        } while (newIndex == ui.currentSongIndex);
+                        ui.currentSongIndex = newIndex;
+                    }
+                } else {
+                    // Normal sequential skip
+                    ui.currentSongIndex = (ui.currentSongIndex + 1) % playlist.size();
+                }
                 ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
                 panel.repaint();
             }
@@ -75,8 +88,12 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
         // 4. Check Skip Back Button
         if (ui.skipBackBounds.contains(x, y)) {
             if (!playlist.isEmpty()) {
-                // Math to safely loop to the last song if we hit the beginning
-                ui.currentSongIndex = (ui.currentSongIndex - 1 + playlist.size()) % playlist.size();
+                if (ui.isRepeat) {
+                    // Do nothing to the index; replay current song
+                } else {
+                    // Normal sequential backward skip (we usually ignore shuffle when going backwards)
+                    ui.currentSongIndex = (ui.currentSongIndex - 1 + playlist.size()) % playlist.size();
+                }
                 ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
                 panel.repaint();
             }
