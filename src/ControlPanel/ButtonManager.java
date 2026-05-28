@@ -9,8 +9,6 @@ public abstract class ButtonManager {
     protected Panel panel;
     protected UI ui;
 
-    // private int buttonPressed = 0;
-
     public ButtonManager(int x, int y, int width, int height, Panel panel, UI ui){
         this.x = x;
         this.y = y;
@@ -20,6 +18,7 @@ public abstract class ButtonManager {
         this.panel = panel;
     }
   
+    //Collision checker 
     public boolean collisionCheck(int mouseX, int mouseY){
         return mouseX >= this.x && 
             mouseX <= (this.x + this.width) && 

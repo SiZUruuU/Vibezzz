@@ -12,6 +12,7 @@ public class UI {
 
     Panel panel;
     public boolean exit = false;
+    public boolean escInq = false;
 
    
     int exitX = 265, exitY = 355, exitW = 40, exitH = 20;
@@ -39,9 +40,7 @@ public class UI {
     public UI(Panel panel) {
         this.panel = panel;
         
-        // 
         backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this));
-        
         loadAssets();
     }
 
@@ -95,9 +94,8 @@ public class UI {
         drawPage(g2);
         drawImages(g2);
 
-        if (exit) {
-            drawExitInquiry(g2);
-        }
+        if (exit) {drawExitInquiry(g2);}
+        if (escInq) {drawExit(g2);}
     }
 
     //  PAGE CONTAINERS & TEXT 
@@ -327,7 +325,20 @@ public class UI {
 
     //  TOGGLE 
     public void exitInquiry() {
+
         exit = !exit;
         panel.repaint();
+    }
+
+    public void drawExit(Graphics2D g2){
+
+        g2.setColor(Color.decode("#555555"));
+        g2.fillRoundRect(270, 5, 120, 30, 30, 30);
+
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Inter", Font.PLAIN, 12));
+        String text = "Press ESC to exit";
+
+        g2.drawString(text, 283, 23);
     }
 }
