@@ -1,0 +1,12 @@
+# Compiled class files
+*.class
+/bin/
+/out/
+
+# IDE files
+.vscode/
+.classpath
+.project
+
+# Libraries
+/lib/
