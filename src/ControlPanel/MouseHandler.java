@@ -83,7 +83,23 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             return;
         }
 
-        // 5. Check normal backend buttons
+        // 5. Check Repeat Button
+        if (ui.repeatBounds.contains(x, y)) {
+            ui.isRepeat = !ui.isRepeat; // Toggle on/off
+            panel.repaint();
+            return;
+        }
+
+        // 6. Check Shuffle Button
+        if (ui.shuffleBounds.contains(x, y)) {
+            ui.isShuffle = !ui.isShuffle; // Toggle on/off
+            panel.repaint();
+            return;
+        }
+
+
+
+        // 7. Check normal backend buttons
         if (!ui.exit) {
             for (ButtonManager button : ui.getBackendButtons()) {
                 if (button.collisionCheck(x, y)) {

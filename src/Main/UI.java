@@ -24,6 +24,11 @@ public class UI {
     public Rectangle playPauseBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle skipFwdBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle skipBackBounds = new Rectangle(0, 0, 0, 0);
+    public Rectangle repeatBounds = new Rectangle(0, 0, 0, 0);
+    public Rectangle shuffleBounds = new Rectangle(0, 0, 0, 0);
+    
+    public boolean isRepeat = false;
+    public boolean isShuffle = false;
     
     public AudioEngine audioEngine = new AudioEngine();
     public MusicHandler musicHandler = new MusicHandler();
@@ -252,22 +257,33 @@ public class UI {
         for (int i = 0; i < controls.length; i++) {
             if (controls[i] != null) {
                 int cx = rightX + 25 + i * (iconWidth + spacing);
-                
-                // Determine which icon to draw and set their invisible hitboxes
                 Image iconToDraw = controls[i];
                 
-                if (i == 2) { // The Play button is at index 2
+                // Map out the hitboxes and active state indicators
+                if (i == 0) { // Repeat Button
+                    repeatBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                    if (isRepeat) {
+                        g2.setColor(Color.decode("#1DB954")); // Spotify Green indicator
+                        g2.fillOval(cx + (iconWidth / 2) - 2, ctrlY + iconWidth + 4, 4, 4);
+                    }
+                } else if (i == 1) { // Skip Back
+                    skipBackBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                } else if (i == 2) { // Play/Pause
                     iconToDraw = audioEngine.isPlaying() ? iconPause : iconPlay;
                     playPauseBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
-                } else if (i == 1) { // Skip Back is at index 1
-                    skipBackBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
-                } else if (i == 3) { // Skip Forward is at index 3
+                } else if (i == 3) { // Skip Forward
                     skipFwdBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                } else if (i == 4) { // Shuffle Button
+                    shuffleBounds.setBounds(cx, ctrlY, iconWidth, iconWidth);
+                    if (isShuffle) {
+                        g2.setColor(Color.decode("#1DB954")); 
+                        g2.fillOval(cx + (iconWidth / 2) - 2, ctrlY + iconWidth + 4, 4, 4);
+                    }
                 }
 
                 g2.drawImage(iconToDraw, cx, ctrlY, iconWidth, iconWidth, null);
             }
-        }   
+        }
     }
 
     //  EXIT POPUP 
