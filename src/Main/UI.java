@@ -13,6 +13,7 @@ public class UI {
 
     Panel panel;
     public boolean exit = false;
+    public boolean escInq = false;
 
     // --- BUTTON LISTS FOR MOUSEHANDLER ---
     private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
@@ -111,6 +112,11 @@ public class UI {
         LibraryView.draw(g2, this, w, h);
         PlayerView.draw(g2, this, w, h);
 
+        // --- NEW: Trigger the ESC hover UI ---
+        if (escInq) {
+            drawExit(g2);
+        }
+
         if (exit) {
             PopupView.draw(g2, this, w, h);
         }
@@ -147,5 +153,25 @@ public class UI {
             System.out.println("Failed to load images. Make sure your '/assets/' folder exists and file names are exact.");
             e.printStackTrace();
         }
+         }
+        public void drawExit(Graphics2D g2) {
+        g2.setFont(new Font("Inter", Font.PLAIN, 16));
+        FontMetrics fm = g2.getFontMetrics();
+        String text = "Press ESC to Exit";
+
+        int textWidth = fm.stringWidth(text);
+        int padding = 20; 
+        int boxWidth = textWidth + (padding * 2);
+        int boxHeight = 30;
+
+        int boxX = (panel.getWidth() - boxWidth) / 2;
+        int boxY = 5;
+
+        g2.setColor(Color.decode("#555555"));
+        g2.fillRoundRect(boxX, boxY, boxWidth, boxHeight, boxHeight, boxHeight);
+
+
+        g2.setColor(Color.WHITE);
+        g2.drawString(text, boxX + padding, boxY + 21); 
     }
 }
