@@ -29,6 +29,8 @@ public class UI {
     public ButtonManager progressBarSeeker;
     public ButtonManager exitYesButton;
     public ButtonManager exitNoButton;
+    public ButtonManager addFolderButton;
+    public ButtonManager libraryListClicker;
     
     // --- STATE VARIABLES ---
     public boolean isRepeat = false;
@@ -69,7 +71,11 @@ public class UI {
         skipBackButton = new SkipButton(panel, this, false);
         repeatButton = new ToggleButton(panel, this, "repeat");
         shuffleButton = new ToggleButton(panel, this, "shuffle");
+        addFolderButton = new AddFolderButton(panel, this);
+        libraryListClicker = new LibraryListClicker(panel, this);
         
+        backEndButtons.add(addFolderButton);
+        backEndButtons.add(libraryListClicker);
         backEndButtons.add(playPauseButton);
         backEndButtons.add(progressBarSeeker);
         backEndButtons.add(skipFwdButton);

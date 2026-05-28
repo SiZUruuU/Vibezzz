@@ -1,12 +1,13 @@
 package Main;
 
+import ControlPanel.Song;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class LibraryView {
 
     public static void draw(Graphics2D g2, UI ui, int w, int h) {
         
-        // Layout Math
         int pad = 25;
         int gap = 20;
         int totalWidth = w - (pad * 2) - gap;
@@ -17,7 +18,6 @@ public class LibraryView {
         int searchY = pad + 10;
         int contentY = searchY + searchH + 25;
         int contentH = h - contentY - pad;
-
         int rightX = pad + leftW + gap;
         int playlistsH = (int) (contentH * 0.35);
 
@@ -27,37 +27,60 @@ public class LibraryView {
         g2.setColor(Color.decode("#313338"));
         g2.fillRoundRect(searchX, searchY, searchW, searchH, searchH, searchH);
 
-        if (ui.iconArtist != null) 
-            g2.drawImage(ui.iconArtist, searchX + 12, searchY + (searchH - 20) / 2, 20, 20, null);
-        if (ui.iconSearch != null) 
-            g2.drawImage(ui.iconSearch, searchX + searchW - 32, searchY + (searchH - 20) / 2, 20, 20, null);
-        if (ui.iconSettings != null) 
-            g2.drawImage(ui.iconSettings, w - pad - 28, searchY + (searchH - 24) / 2, 24, 24, null);
+        if (ui.iconArtist != null) g2.drawImage(ui.iconArtist, searchX + 12, searchY + (searchH - 20) / 2, 20, 20, null);
+        if (ui.iconSearch != null) g2.drawImage(ui.iconSearch, searchX + searchW - 32, searchY + (searchH - 20) / 2, 20, 20, null);
+        if (ui.iconSettings != null) g2.drawImage(ui.iconSettings, w - pad - 28, searchY + (searchH - 24) / 2, 24, 24, null);
 
         // 2. LIBRARY CONTAINER
         g2.setColor(Color.decode("#2B2D31"));
         g2.fillRoundRect(pad, contentY, leftW, contentH, 30, 30);
 
+        // Map the Add Folder Hitbox to the top left text area
+        if (ui.addFolderButton != null) ui.addFolderButton.setBounds(pad + 20, contentY + 10, 150, 30);
+
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Inter", Font.BOLD, 18));
         g2.drawString("LIBRARY", pad + 60, contentY + 35);
         
-        if (ui.iconLibrary != null)
-            g2.drawImage(ui.iconLibrary, pad + 25, contentY + 16, 24, 24, null);
+        g2.setColor(Color.GRAY);
+        g2.setFont(new Font("Inter", Font.PLAIN, 12));
+        g2.drawString("+ Add Folder", pad + 150, contentY + 34);
 
-        // 3. PLAYLISTS CONTAINER
+        if (ui.iconLibrary != null) g2.drawImage(ui.iconLibrary, pad + 25, contentY + 16, 24, 24, null);
+
+        // --- NEW: DRAW THE SONG LIST ---
+        ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
+        int listStartY = contentY + 75;
+        int rowHeight = 30;
+        
+        // Map the massive hitbox for the clicker over the entire list area
+        if (ui.libraryListClicker != null) {
+            ui.libraryListClicker.setBounds(pad + 25, listStartY - 20, leftW - 50, playlist.size() * rowHeight);
+        }
+
+        g2.setFont(new Font("Inter", Font.PLAIN, 13));
+        for (int i = 0; i < playlist.size(); i++) {
+            // Stop drawing if we reach the bottom of the container (No scrolling yet)
+            if (listStartY + (i * rowHeight) > contentY + contentH - 20) break; 
+            
+            Song s = playlist.get(i);
+            String display = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
+
+            // Highlight the currently playing song in Spotify Green
+            if (ui.currentSongIndex == i) g2.setColor(Color.decode("#1DB954"));
+            else g2.setColor(Color.WHITE);
+
+            g2.drawString(display, pad + 25, listStartY + (i * rowHeight));
+        }
+
+        // 3. PLAYLISTS CONTAINER (Unchanged)
         g2.setColor(Color.decode("#2B2D31"));
         g2.fillRoundRect(rightX, contentY, rightW, playlistsH, 30, 30);
-
         g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Inter", Font.BOLD, 18));
         g2.drawString("PLAYLISTS", rightX + 60, contentY + 35);
-        
-        if (ui.iconAlbum != null)
-            g2.drawImage(ui.iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
-
+        if (ui.iconAlbum != null) g2.drawImage(ui.iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
         g2.setFont(new Font("Inter", Font.BOLD, 16));
-        FontMetrics fmNone = g2.getFontMetrics();
-        int noneW = fmNone.stringWidth("None");
-        g2.drawString("None", rightX + (rightW - noneW) / 2, contentY + (playlistsH / 2) + 10);
+        g2.drawString("None", rightX + (rightW - g2.getFontMetrics().stringWidth("None")) / 2, contentY + (playlistsH / 2) + 10);
     }
 }
