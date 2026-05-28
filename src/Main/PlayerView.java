@@ -125,5 +125,6 @@ public class PlayerView {
                 g2.drawImage(iconToDraw, cx, ctrlY, iconWidth, iconWidth, null);
             }
         }
+
+        }
     }
-}

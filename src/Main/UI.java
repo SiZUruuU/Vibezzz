@@ -31,11 +31,21 @@ public class UI {
     public ButtonManager exitNoButton;
     public ButtonManager addFolderButton;
     public ButtonManager libraryListClicker;
+    public ButtonManager settings;
+
+    // --- OBJECTS ---
+
+    public VolumeSlider volumeSlider;
     
     // --- STATE VARIABLES ---
     public boolean isRepeat = false;
     public boolean isShuffle = false;
     public int currentSongIndex = 0;
+    public boolean settingsPressed = false;
+    public boolean isDraggingVolume = false;
+    public int scrollOffset = 0;       
+    public int maxScrollOffset = 0;   
+    public int libraryViewportH = 0;
     
     // --- HANDLERS ---
     public AudioEngine audioEngine = new AudioEngine();
@@ -73,7 +83,9 @@ public class UI {
         shuffleButton = new ToggleButton(panel, this, "shuffle");
         addFolderButton = new AddFolderButton(panel, this);
         libraryListClicker = new LibraryListClicker(panel, this);
-        
+        settings = new SettingsButton(panel, this); 
+        volumeSlider = new VolumeSlider(panel, this); // Instantiate the slider
+
         backEndButtons.add(addFolderButton);
         backEndButtons.add(libraryListClicker);
         backEndButtons.add(playPauseButton);
@@ -82,6 +94,8 @@ public class UI {
         backEndButtons.add(skipBackButton);
         backEndButtons.add(repeatButton);
         backEndButtons.add(shuffleButton);
+        backEndButtons.add(settings);
+        backEndButtons.add(volumeSlider); 
 
         exitYesButton = new ExitPopupButton(panel, this, true);
         exitNoButton = new ExitPopupButton(panel, this, false);
@@ -117,6 +131,10 @@ public class UI {
         // Let the Views handle the heavy lifting!
         LibraryView.draw(g2, this, w, h);
         PlayerView.draw(g2, this, w, h);
+
+        if(settingsPressed) {
+            VolumeView.draw(g2, this, w, h);
+        }
 
         // --- NEW: Trigger the ESC hover UI ---
         if (escInq) {
@@ -179,5 +197,35 @@ public class UI {
 
         g2.setColor(Color.WHITE);
         g2.drawString(text, boxX + padding, boxY + 21); 
+    }
+
+    public static String getClampedText(Graphics2D g2, String text, int maxWidth) {
+        if (text == null || text.isEmpty()) return "";
+
+        FontMetrics fm = g2.getFontMetrics();
+    
+        // If the text naturally fits inside the allowed boundary, return it as-is
+        if (fm.stringWidth(text) <= maxWidth) {
+        return text;
+        }
+    
+        String ellipsis = "...";
+        int ellipsisWidth = fm.stringWidth(ellipsis);
+    
+        // Safety check: if the column is narrower than the ellipsis itself, return empty
+        if (maxWidth <= ellipsisWidth) return "";
+    
+        // Build the string up character by character until it hits the limit
+        StringBuilder truncated = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            // Test if adding the next character + the ellipsis exceeds our boundary
+            if (fm.stringWidth(truncated.toString() + c + ellipsis) > maxWidth) {
+            break;
+            }
+            truncated.append(c);
+        }
+    
+        return truncated.toString() + ellipsis;
     }
 }
