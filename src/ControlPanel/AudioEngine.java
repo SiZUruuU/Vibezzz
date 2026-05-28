@@ -6,6 +6,8 @@ import javazoom.jl.player.Player;
 import javax.swing.SwingUtilities;
 
 public class AudioEngine {
+
+    private VolumeController volumeC;
     
     private Player player;
     private Thread playerThread;
@@ -16,6 +18,7 @@ public class AudioEngine {
     private FileInputStream fis;
     private long totalLength = 0;
     private long pauseLocation = 0;
+    private float globalVolume = 1.0f;
     
     private Runnable onTrackEnd; // Callback for when a song finishes
 
@@ -49,7 +52,12 @@ public class AudioEngine {
             }
 
             BufferedInputStream bis = new BufferedInputStream(fis);
-            player = new Player(bis);
+           
+            volumeC = new VolumeController();
+            volumeC.setVolume(globalVolume);
+            player = new Player(bis, volumeC);
+
+
             isPlaying = true;
             isManuallyStopped = false; // Reset the flag before playing
 
@@ -131,4 +139,15 @@ public class AudioEngine {
     }
 
     public boolean isPlaying() { return isPlaying; }
+
+    public void setVolume(float volume) {
+    this.globalVolume = volume;
+    if (volumeC != null) {
+        volumeC.setVolume(volume);
+    }
+}
+
+    public float getVolume() {
+        return this.globalVolume;
+}
 }

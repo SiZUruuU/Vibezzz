@@ -12,7 +12,6 @@ public abstract class ButtonManager {
         this.ui = ui; this.panel = panel;
     }
   
-    // NEW: Allows UI.java to update the hitbox locations dynamically
     public void setBounds(int x, int y, int width, int height) {
         this.x = x; this.y = y; this.width = width; this.height = height;
     }
@@ -22,6 +21,5 @@ public abstract class ButtonManager {
                mouseY >= this.y && mouseY <= (this.y + this.height);
     }
 
-    // NEW: We pass the mouse coordinates down for advanced buttons (like the slider)
     public abstract void execute(int mouseX, int mouseY);
 }

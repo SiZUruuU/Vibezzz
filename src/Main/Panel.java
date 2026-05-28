@@ -22,6 +22,7 @@ public class Panel extends JPanel {
         this.addKeyListener(keyH);
         this.addMouseListener(mouse);
         this.addMouseMotionListener(mouse);
+        this.addMouseWheelListener(mouse);
         
         this.setFocusable(true);
         this.requestFocusInWindow();
@@ -33,12 +34,6 @@ public class Panel extends JPanel {
         else{ui.exit = false;}  
         repaint();
     }
-
-    // public void escInquiry(){
-    //     if(ui.escInq){ui.escInq = false;}
-    //     else{ui.escInq = true;}
-    //     repaint();
-    // }
 
     public void setHeaderHover(boolean hovering){
         if(ui.escInq != hovering){
