@@ -1,168 +1,315 @@
 package Main;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.ArrayList;         
+import javax.swing.ImageIcon;
 
-import ControlPanel.ButtonManager;
-import ControlPanel.ExitButton;
+import ControlPanel.ButtonManager;  
+import ControlPanel.ExitButton;     
 
 public class UI {
 
     Panel panel;
-    Graphics2D g2;
     public boolean exit = false;
-    int exitX = 265, exitY = 355, exitW = 40, exitH = 20; //Coordinates for exit button
+    public boolean escInq = false;
+
+   
+    int exitX = 265, exitY = 355, exitW = 40, exitH = 20;
 
     //Arraylist for backend button coordinates
     private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
-
-    // Added hitboxes for the buttons
     public Rectangle yesButtonBounds = new Rectangle(0, 0, 0, 0);
     public Rectangle noButtonBounds = new Rectangle(0, 0, 0, 0);
 
-    public UI(Panel panel){
-        this.panel = panel;
+    //  ASSETS 
+    private Image iconLibrary, iconAlbum, iconArtist, iconSong;
+    private Image iconPlay, iconPause, iconFastFwd, iconMute;
+    private Image imgProgressBar, imgProgressKnob;
+    private Image iconRepeat, iconRewind, iconSearch, iconSettings, iconShuffle, iconSkipBack, iconSkipFwd;
+    private Image iconVolDown, iconVolUp;
 
-        backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this)); //Child class added into arraylists
+    public UI(Panel panel) {
+        this.panel = panel;
+        
+        backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this));
+        loadAssets();
     }
 
+    
     public ArrayList<ButtonManager> getBackendButtons() {
         return backEndButtons;
     }
 
-    public void draw(Graphics2D g2){
+    //  LOAD ASSETS 
+    private void loadAssets() {
+        try {
+            iconLibrary     = new ImageIcon(getClass().getResource("/assets/Library.png")).getImage();
+            iconAlbum       = new ImageIcon(getClass().getResource("/assets/Album.png")).getImage();
+            iconArtist      = new ImageIcon(getClass().getResource("/assets/Artist.png")).getImage();
+            iconSong        = new ImageIcon(getClass().getResource("/assets/Song.png")).getImage();
+            iconPlay        = new ImageIcon(getClass().getResource("/assets/Play.png")).getImage();
+            iconPause       = new ImageIcon(getClass().getResource("/assets/Pause.png")).getImage();
+            iconFastFwd     = new ImageIcon(getClass().getResource("/assets/Fast Fwd.png")).getImage();
+            iconMute        = new ImageIcon(getClass().getResource("/assets/Mute.png")).getImage();
+            imgProgressBar  = new ImageIcon(getClass().getResource("/assets/Line 1.png")).getImage();
+            imgProgressKnob = new ImageIcon(getClass().getResource("/assets/Ellipse 1.png")).getImage();
+            iconRepeat      = new ImageIcon(getClass().getResource("/assets/Repeat.png")).getImage();
+            iconRewind      = new ImageIcon(getClass().getResource("/assets/Rewind.png")).getImage();
+            iconSearch      = new ImageIcon(getClass().getResource("/assets/Search.png")).getImage();
+            iconSettings    = new ImageIcon(getClass().getResource("/assets/Settings.png")).getImage();
+            iconShuffle     = new ImageIcon(getClass().getResource("/assets/Shuffle.png")).getImage();
+            iconSkipBack    = new ImageIcon(getClass().getResource("/assets/Skip Back.png")).getImage();
+            iconSkipFwd     = new ImageIcon(getClass().getResource("/assets/Skip Fwd.png")).getImage();
+            iconVolDown     = new ImageIcon(getClass().getResource("/assets/Volume Down.png")).getImage();
+            iconVolUp       = new ImageIcon(getClass().getResource("/assets/Volume Up.png")).getImage();
+            
+        } catch (Exception e) {
+            System.out.println("Failed to load images. Make sure your '/assets/' folder exists and file names are exact.");
+            e.printStackTrace();
+        }
+    }
+
+    //  SHARED LAYOUT 
+    private int pad() { return 25; }
+    private int searchY() { return pad() + 10; }
+    private int searchH() { return 36; }
+    private int contentY() { return searchY() + searchH() + 25; }
+
+    //  MAIN DRAW 
+    public void draw(Graphics2D g2) {
         panel.setBackground(Color.decode("#1E1F22"));
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         drawPage(g2);
-        if(exit){ drawExitInquiry(g2);}
+        drawImages(g2);
 
+        if (exit) {drawExitInquiry(g2);}
+        if (escInq) {drawExit(g2);}
     }
 
-    public void imageDraw(Graphics2D g2){
+    //  PAGE CONTAINERS & TEXT 
+    public void drawPage(Graphics2D g2) {
+        int w = panel.getWidth();
+        int h = panel.getHeight();
 
-    }
+        int pad = this.pad();
+        int gap = 20;
 
-    public void drawExitInquiry(Graphics2D g2){
+        int totalWidth = w - (pad * 2) - gap;
+        int leftW = (int) (totalWidth * 0.60); 
+        int rightW = totalWidth - leftW;
+
+        int contentY = contentY();
+        int contentH = h - contentY - pad;
+
+        int rightX = pad + leftW + gap;
+        int playlistsH = (int) (contentH * 0.35); 
+        int playerY = contentY + playlistsH + gap;
+        int playerH = contentH - playlistsH - gap;
+
+        // 1. TOP HEADER / SEARCH BAR CONTAINER
+        int searchW = (int) (w * 0.45);
+        int searchX = (w - searchW) / 2;
+        g2.setColor(Color.decode("#313338"));
+        g2.fillRoundRect(searchX, searchY(), searchW, searchH(), searchH(), searchH()); 
+
+        // 2. LIBRARY CONTAINER
+        g2.setColor(Color.decode("#2B2D31"));
+        g2.fillRoundRect(pad, contentY, leftW, contentH, 30, 30);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Inter", Font.BOLD, 18));
+        g2.drawString("LIBRARY", pad + 60, contentY + 35);
+
+        // 3. PLAYLISTS CONTAINER
+        g2.setColor(Color.decode("#2B2D31"));
+        g2.fillRoundRect(rightX, contentY, rightW, playlistsH, 30, 30);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Inter", Font.BOLD, 18));
+        g2.drawString("PLAYLISTS", rightX + 60, contentY + 35);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Inter", Font.BOLD, 16));
+        FontMetrics fmNone = g2.getFontMetrics();
+        int noneW = fmNone.stringWidth("None");
+        g2.drawString("None", rightX + (rightW - noneW) / 2, contentY + (playlistsH / 2) + 10);
+
+        // 4. PLAYER CONTAINER
+        g2.setColor(Color.decode("#2B2D31"));
+        g2.fillRoundRect(rightX, playerY, rightW, playerH, 30, 30);
+
+        g2.setFont(new Font("Inter", Font.BOLD, 16));
+        FontMetrics fmTitle = g2.getFontMetrics();
+        String trackTitle = "Someday I'll Get it";
+        int titleW = fmTitle.stringWidth(trackTitle);
         
+        int songIconSize = 18;
+        int songIconGap = 8;
+        int totalRowW = songIconSize + songIconGap + titleW;
+        int rowX = rightX + (rightW - totalRowW) / 2;
+        int titleY = playerY + (int)(playerH * 0.68);
+        
+        g2.drawString(trackTitle, rowX + songIconSize + songIconGap, titleY);
+
+        g2.setColor(Color.GRAY);
+        g2.setFont(new Font("Inter", Font.PLAIN, 12));
+        FontMetrics fmArtist = g2.getFontMetrics();
+        String artistName = "Alek Olsen";
+        int artistW = fmArtist.stringWidth(artistName);
+        g2.drawString(artistName, rightX + (rightW - artistW) / 2, titleY + 18);
+    }
+
+    //  IMAGES & ICONS PLACEMENT 
+    public void drawImages(Graphics2D g2) {
+        int w = panel.getWidth();
+        int h = panel.getHeight();
+
+        int pad = this.pad();
+        int gap = 20;
+
+        int totalWidth = w - (pad * 2) - gap;
+        int leftW = (int) (totalWidth * 0.60);
+        int rightW = totalWidth - leftW;
+
+        int contentY = contentY();
+        int contentH = h - contentY - pad;
+
+        int rightX = pad + leftW + gap;
+        int playlistsH = (int) (contentH * 0.35);
+        int playerY = contentY + playlistsH + gap;
+        int playerH = contentH - playlistsH - gap;
+
+        int searchW = (int) (w * 0.45);
+        int searchX = (w - searchW) / 2;
+        
+        if (iconArtist != null) 
+            g2.drawImage(iconArtist, searchX + 12, searchY() + (searchH() - 20) / 2, 20, 20, null);
+        if (iconSearch != null) 
+            g2.drawImage(iconSearch, searchX + searchW - 32, searchY() + (searchH() - 20) / 2, 20, 20, null);
+        if (iconSettings != null) 
+            g2.drawImage(iconSettings, w - pad - 28, searchY() + (searchH() - 24) / 2, 24, 24, null);
+
+        if (iconLibrary != null)
+            g2.drawImage(iconLibrary, pad + 25, contentY + 16, 24, 24, null);
+
+        if (iconAlbum != null)
+            g2.drawImage(iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
+
+        int artSize = (int) (rightW * 0.76);
+        int artX = rightX + (rightW - artSize) / 2;
+        int titleY = playerY + (int)(playerH * 0.68);
+
+        g2.setFont(new Font("Inter", Font.BOLD, 16));
+        FontMetrics fmTitle = g2.getFontMetrics();
+        int titleW = fmTitle.stringWidth("Someday I'll Get it");
+        int songIconSize = 16;
+        int songIconGap = 8;
+        int totalRowW = songIconSize + songIconGap + titleW;
+        int rowX = rightX + (rightW - totalRowW) / 2;
+        
+        if (iconSong != null) {
+            g2.drawImage(iconSong, rowX, titleY - 14, songIconSize, songIconSize, null);
+        }
+
+        int barW = artSize;
+        int barX = artX;
+        int barY = titleY + 36;
+        if (imgProgressBar != null) {
+            g2.drawImage(imgProgressBar, barX, barY, barW, 4, null);
+        }
+        if (imgProgressKnob != null) {
+            int knobX = barX + (int)(barW * 0.30) - 6; 
+            g2.drawImage(imgProgressKnob, knobX, barY - 4, 12, 12, null);
+        }
+
+        int ctrlY = barY + 16;
+        Image[] controls = { iconRepeat, iconSkipBack, iconPlay, iconSkipFwd, iconShuffle };
+        int iconWidth = 22;
+        int totalControlsW = rightW - 50; 
+        int spacing = (totalControlsW - (controls.length * iconWidth)) / (controls.length - 1);
+
+        for (int i = 0; i < controls.length; i++) {
+            if (controls[i] != null) {
+                int cx = rightX + 25 + i * (iconWidth + spacing);
+                g2.drawImage(controls[i], cx, ctrlY, iconWidth, iconWidth, null);
+            }
+        }
+    }
+
+    //  EXIT POPUP 
+    public void drawExitInquiry(Graphics2D g2) {
         g2.setFont(new Font("Inter", Font.PLAIN, 16));
         FontMetrics fm = g2.getFontMetrics();
-        
-        String message = "Are you sure you want to exit Vibezz?";
-        int textWidth = fm.stringWidth(message);
 
-        
-        int paddingX = 30;
-        int popupWidth = textWidth + (paddingX * 2);
-        int popupHeight = 110; 
+        String msg = "Are you sure you want to exit Vibezz?";
+        int textW = fm.stringWidth(msg);
 
-        // Center popup
-        int panelW = panel.getWidth();
-        int panelH = panel.getHeight();
-        int popupX = (panelW - popupWidth) / 2;
-        int popupY = (panelH - popupHeight) / 2;
-
-        //BG
-        g2.setColor(Color.decode("#313338"));
-        g2.fillRoundRect(popupX, popupY, popupWidth, popupHeight, 30, 30);
-        
-        
-        g2.setColor(Color.decode("#F2F3F5"));
-        int textX = popupX + paddingX;
-        int textY = popupY + 40;
-        g2.drawString(message, textX, textY);
-
-        // button
-        int btnWidth = 60;
-        int btnHeight = 30;
-        int btnSpacing = 30; // Space between Yes and No
-        int totalBtnWidth = (btnWidth * 2) + btnSpacing;
-        
-        // Center the button
-        int btnStartX = popupX + (popupWidth - totalBtnWidth) / 2;
-        int btnY = popupY + 60;
-
-        // YES
-        int yesX = btnStartX;
-        g2.setColor(Color.decode("#5865F2"));
-        g2.fillRoundRect(yesX, btnY, btnWidth, btnHeight, 15, 15);
-        
-        // Update the YES button hitbox to match its exact visual coordinates
-        yesButtonBounds.setBounds(yesX, btnY, btnWidth, btnHeight);
-        
-        g2.setColor(Color.decode("#F2F3F5"));
-        int yesTextWidth = fm.stringWidth("Yes");
-        // Center text
-        g2.drawString("Yes", yesX + (btnWidth - yesTextWidth) / 2, btnY + 20); 
-
-        // NO
-        int noX = btnStartX + btnWidth + btnSpacing;
-        g2.setColor(Color.decode("#5865F2"));
-        g2.fillRoundRect(noX, btnY, btnWidth, btnHeight, 15, 15);
-
-        // Update the NO button hitbox to match its exact visual coordinates
-        noButtonBounds.setBounds(noX, btnY, btnWidth, btnHeight);
-
-        g2.setColor(Color.decode("#F2F3F5"));
-        int noTextWidth = fm.stringWidth("No");
-        // Center text
-        g2.drawString("No", noX + (btnWidth - noTextWidth) / 2, btnY + 20);
-    }
-
-    public void drawPage(Graphics2D g2){
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int pad = 30;
+        int popupW = textW + (pad * 2);
+        int popupH = 110;
 
         int w = panel.getWidth();
         int h = panel.getHeight();
-        //Background
-        g2.setColor(Color.decode("#1E1F22"));
-        g2.fillRect(0, 0, w, h);
 
-        int pad = 25;
-        int gap = 15;
+        int x = (w - popupW) / 2;
+        int y = (h - popupH) / 2;
 
-        int totalUsableWidth = w - (pad * 2) - gap;
-        int leftW = (int) (totalUsableWidth * 0.55); 
-        int rightW = totalUsableWidth - leftW;
-
-        int searchBarY = pad + 10;
-        int searchBarH = 32;
-        int contentY = searchBarY + searchBarH + 20;
-        int contentH = h - contentY - pad;
-
-
-        //Search Bar
         g2.setColor(Color.decode("#313338"));
-        int searchBarW = (int) (leftW * 1.0); 
-        g2.fillRoundRect(pad, searchBarY, searchBarW, searchBarH, 15, 15);
+        g2.fillRoundRect(x, y, popupW, popupH, 30, 30);
 
-        //Library
-        g2.setColor(Color.decode("#2B2D31"));
-        g2.fillRoundRect(pad, contentY, leftW, contentH, 25, 25);
+        g2.setColor(Color.WHITE);
+        g2.drawString(msg, x + pad, y + 40);
 
-        g2.setColor(Color.decode("#F2F3F5"));
-        g2.setFont(new Font("Inter", Font.PLAIN, 16));
-        g2.drawString("LIBRARY", pad + 55, contentY + 32);
+        int btnW = 60;
+        int btnH = 30;
+        int space = 30;
 
-        int rightX = pad + leftW + gap;
-        int subH = (contentH - gap) / 2; 
+        int startX = x + (popupW - (btnW * 2 + space)) / 2;
+        int btnY = y + 60;
 
-        //Playlists
-        g2.setColor(Color.decode("#2B2D31"));
-        g2.fillRoundRect(rightX, contentY, rightW, subH, 25, 25);
-
-        g2.setColor(Color.decode("#F2F3F5"));
-        g2.drawString("PLAYLISTS", rightX + 50, contentY + 32);
+        // YES BUTTON
+        g2.setColor(Color.decode("#5865F2"));
+        g2.fillRoundRect(startX, btnY, btnW, btnH, 15, 15);
         
-        g2.setColor(Color.GRAY);
-        g2.setFont(new Font("Inter", Font.PLAIN, 14));
-        g2.drawString("None", rightX + (rightW / 2) - 18, contentY + (subH / 2) + 5);
+        
+        yesButtonBounds.setBounds(startX, btnY, btnW, btnH);
 
-        int playerY = contentY + subH + gap;
-        //Player
-        g2.setColor(Color.decode("#2B2D31"));
-        g2.fillRoundRect(rightX, playerY, rightW, subH, 25, 25);
+        g2.setColor(Color.WHITE);
+        int yesTextWidth = fm.stringWidth("Yes");
+        g2.drawString("Yes", startX + (btnW - yesTextWidth) / 2, btnY + 20);
 
-        g2.setColor(Color.decode("#F2F3F5"));
-        g2.setFont(new Font("Inter", Font.PLAIN, 16));
-        g2.drawString("PLAYER", rightX + 20, playerY + 32);
+        // NO BUTTON
+        int noX = startX + btnW + space;
+        g2.setColor(Color.decode("#5865F2"));
+        g2.fillRoundRect(noX, btnY, btnW, btnH, 15, 15);
+        
+    
+        noButtonBounds.setBounds(noX, btnY, btnW, btnH);
+
+        g2.setColor(Color.WHITE);
+        int noTextWidth = fm.stringWidth("No");
+        g2.drawString("No", noX + (btnW - noTextWidth) / 2, btnY + 20);
+    }
+
+    //  TOGGLE 
+    public void exitInquiry() {
+
+        exit = !exit;
+        panel.repaint();
+    }
+
+    public void drawExit(Graphics2D g2){
+
+        g2.setColor(Color.decode("#555555"));
+        g2.fillRoundRect(270, 5, 120, 30, 30, 30);
+
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Inter", Font.PLAIN, 12));
+        String text = "Press ESC to exit";
+
+        g2.drawString(text, 283, 23);
     }
 }

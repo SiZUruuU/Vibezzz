@@ -68,7 +68,14 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {}
+    public void mouseMoved(MouseEvent e) {
+
+        int x = e.getX();
+        int y = e.getY();
+
+        if(y <= 50){panel.setHeaderHover(true);}
+        else{panel.setHeaderHover(false);}
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) {}

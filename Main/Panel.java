@@ -34,6 +34,19 @@ public class Panel extends JPanel {
         repaint();
     }
 
+    // public void escInquiry(){
+    //     if(ui.escInq){ui.escInq = false;}
+    //     else{ui.escInq = true;}
+    //     repaint();
+    // }
+
+    public void setHeaderHover(boolean hovering){
+        if(ui.escInq != hovering){
+            ui.escInq = hovering;
+            repaint();
+        }
+    }
+
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
