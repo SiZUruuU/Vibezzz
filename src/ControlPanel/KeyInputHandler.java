@@ -1,9 +1,9 @@
 package ControlPanel;
 
+import Main.Panel;
+import Main.UI;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import Main.UI;
-import Main.Panel;
 
 public class KeyInputHandler implements KeyListener {
 

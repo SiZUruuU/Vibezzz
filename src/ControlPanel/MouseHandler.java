@@ -22,115 +22,27 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
         this.ui = ui;
     }
 
-@Override
+    @Override
     public void mouseClicked(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
 
-        // 1. Check Exit Popup First
+        // 1. If Exit Popup is active, ONLY check popup buttons
         if (ui.exit) {
-            if (ui.yesButtonBounds.contains(x, y)) {
-                System.exit(0);
-            } else if (ui.noButtonBounds.contains(x, y)) {
-                panel.exitInquiry();
-            }
-            return;
-        }
-
-        ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
-
-        // 2. Check Play/Pause Button
-        if (ui.playPauseBounds.contains(x, y)) {
-            if (playlist.isEmpty()) {
-                ui.musicHandler.loadDynamicPlaylist();
-                if (!playlist.isEmpty()) {
-                    ui.currentSongIndex = 0;
-                    ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
-                }
-            } else {
-                if (ui.audioEngine.isPlaying()) {
-                    ui.audioEngine.pauseTrack();
-                } else {
-                    ui.audioEngine.resumeTrack();
-                    if (!ui.audioEngine.isPlaying()) {
-                        ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
-                    }
-                }
-            }
-            panel.repaint(); 
-            return;
-        }
-
-        // 3. Check Skip Forward Button
-        if (ui.skipFwdBounds.contains(x, y)) {
-            if (!playlist.isEmpty()) {
-                if (ui.isRepeat) {
-                    // Do nothing to the index; it will just replay the current song
-                } else if (ui.isShuffle) {
-                    // Pick a random index that isn't the currently playing one
-                    if (playlist.size() > 1) {
-                        int newIndex;
-                        do {
-                            newIndex = (int)(Math.random() * playlist.size());
-                        } while (newIndex == ui.currentSongIndex);
-                        ui.currentSongIndex = newIndex;
-                    }
-                } else {
-                    // Normal sequential skip
-                    ui.currentSongIndex = (ui.currentSongIndex + 1) % playlist.size();
-                }
-                ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
-                panel.repaint();
-            }
-            return;
-        }
-
-        // 4. Check Skip Back Button
-        if (ui.skipBackBounds.contains(x, y)) {
-            if (!playlist.isEmpty()) {
-                if (ui.isRepeat) {
-                    // Do nothing to the index; replay current song
-                } else {
-                    // Normal sequential backward skip (we usually ignore shuffle when going backwards)
-                    ui.currentSongIndex = (ui.currentSongIndex - 1 + playlist.size()) % playlist.size();
-                }
-                ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
-                panel.repaint();
-            }
-            return;
-        }
-
-        // 5. Check Repeat Button
-        if (ui.repeatBounds.contains(x, y)) {
-            ui.isRepeat = !ui.isRepeat; // Toggle on/off
-            panel.repaint();
-            return;
-        }
-
-        // 6. Check Shuffle Button
-        if (ui.shuffleBounds.contains(x, y)) {
-            ui.isShuffle = !ui.isShuffle; // Toggle on/off
-            panel.repaint();
-            return;
-        }
-
-        // 7. Check Progress Bar Seek
-        if (ui.progressBarBounds.contains(x, y)) {
-            if (!playlist.isEmpty() && ui.audioEngine.isPlaying()) {
-                // Calculate percentage (0.0 to 1.0) based on where they clicked
-                double percentage = (double) (x - ui.progressBarBounds.x) / ui.progressBarBounds.width;
-                ui.audioEngine.seek(percentage);
-            }
-            return;
-        }
-
-        // 8. Check normal backend buttons
-        if (!ui.exit) {
-            for (ButtonManager button : ui.getBackendButtons()) {
+            for (ButtonManager button : ui.getPopupButtons()) {
                 if (button.collisionCheck(x, y)) {
-                    button.execute();
+                    button.execute(x, y);
                     break;
                 }
+            }
+            return; 
+        }
+
+        // 2. Otherwise, check all backend interactables
+        for (ButtonManager button : ui.getBackendButtons()) {
+            if (button.collisionCheck(x, y)) {
+                button.execute(x, y);
+                break;
             }
         }
     }

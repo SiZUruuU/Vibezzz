@@ -3,28 +3,41 @@ package ControlPanel;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import javazoom.jl.player.Player;
+import javax.swing.SwingUtilities;
 
 public class AudioEngine {
     
     private Player player;
     private Thread playerThread;
     private boolean isPlaying = false;
+    private boolean isManuallyStopped = false; // Prevents double-skipping
     
     private String currentFilePath;
     private FileInputStream fis;
     private long totalLength = 0;
     private long pauseLocation = 0;
+    
+    private Runnable onTrackEnd; // Callback for when a song finishes
+
+    // UI.java will use this to tell the engine what to do when a track finishes
+    public void setTrackEndCallback(Runnable callback) {
+        this.onTrackEnd = callback;
+    }
 
     public void playTrack(String filePath) {
+        playTrack(filePath, false); // Default to a fresh start
+    }
+
+    public void playTrack(String filePath, boolean isResuming) {
         try {
-            // Check if we are starting a completely new song
-            if (currentFilePath != null && !currentFilePath.equals(filePath)) {
-                pauseLocation = 0; // Reset completely for new songs
+            // FIX 1: If we are not specifically resuming, force the track to 0:00
+            if (!isResuming) {
+                pauseLocation = 0; 
             }
 
-            long tempPause = pauseLocation; // Save pause state before stopping
+            long tempPause = pauseLocation; 
             stopTrack(); 
-            pauseLocation = tempPause;      // Restore it!
+            pauseLocation = tempPause;      
 
             currentFilePath = filePath;
             fis = new FileInputStream(filePath);
@@ -38,13 +51,21 @@ public class AudioEngine {
             BufferedInputStream bis = new BufferedInputStream(fis);
             player = new Player(bis);
             isPlaying = true;
+            isManuallyStopped = false; // Reset the flag before playing
 
             playerThread = new Thread(() -> {
                 try {
-                    player.play();
-                    if (player.isComplete()) {
+                    player.play(); // This blocks the thread until the song finishes or is closed
+                    
+                    // FIX 2: If the song finished naturally (not skipped or paused)
+                    if (player.isComplete() && !isManuallyStopped) {
                         isPlaying = false;
                         pauseLocation = 0;
+                        
+                        if (onTrackEnd != null) {
+                            // Safely trigger the UI skip button from the background thread
+                            SwingUtilities.invokeLater(onTrackEnd);
+                        }
                     }
                 } catch (Exception e) {
                     System.out.println("Playback interrupted.");
@@ -62,6 +83,7 @@ public class AudioEngine {
         if (player != null && isPlaying) {
             try {
                 pauseLocation = fis.available(); 
+                isManuallyStopped = true;
                 player.close();
                 isPlaying = false;
                 if (playerThread != null) playerThread.interrupt();
@@ -73,12 +95,14 @@ public class AudioEngine {
 
     public void resumeTrack() {
         if (currentFilePath != null && !isPlaying) {
-            playTrack(currentFilePath);
+            // Tell the engine we are explicitly resuming so it doesn't reset to 0
+            playTrack(currentFilePath, true); 
         }
     }
 
     public void stopTrack() {
         if (player != null) {
+            isManuallyStopped = true;
             player.close();
             pauseLocation = 0;
             isPlaying = false;
@@ -86,7 +110,6 @@ public class AudioEngine {
         }
     }
 
-    // --- NEW: Calculate current progress (0.0 to 1.0) ---
     public double getProgress() {
         if (fis == null || totalLength <= 0) return 0.0;
         try {
@@ -96,16 +119,15 @@ public class AudioEngine {
         }
     }
 
-    // --- NEW: Jump to a specific percentage of the song ---
     public void seek(double percentage) {
         if (currentFilePath == null || totalLength <= 0) return;
         
-        percentage = Math.max(0.0, Math.min(1.0, percentage)); // Keep between 0 and 1
+        percentage = Math.max(0.0, Math.min(1.0, percentage)); 
         pauseLocation = (long) (totalLength * (1.0 - percentage));
         
-        if (pauseLocation <= 0) pauseLocation = 1; // Prevent full reset
+        if (pauseLocation <= 0) pauseLocation = 1; 
         
-        playTrack(currentFilePath); // Replay from new location
+        playTrack(currentFilePath, true); 
     }
 
     public boolean isPlaying() { return isPlaying; }
