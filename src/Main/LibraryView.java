@@ -26,10 +26,31 @@ public class LibraryView {
         int searchX = (w - searchW) / 2;
         g2.setColor(Color.decode("#313338"));
         g2.fillRoundRect(searchX, searchY, searchW, searchH, searchH, searchH);
+        g2.setFont(new Font("Inter", Font.PLAIN, 13));
+
+        // Available text area: after left icon (40px) and before right icon (36px)
+        int textStartX = searchX + 40;
+        int textMaxX   = searchX + searchW - 36;
+        int maxTextW   = textMaxX - textStartX;
+
+        if (ui.searchText.isEmpty()) {
+            // Placeholder
+            g2.setColor(new Color(160, 160, 160));
+            g2.drawString("Search songs...", textStartX, searchY + 24);
+        } else {
+            // Show the TAIL of the typed text so the user always sees what they just typed
+            FontMetrics fm = g2.getFontMetrics();
+            String text = ui.searchText;
+            int start = 0;
+            while (start < text.length() && fm.stringWidth(text.substring(start)) > maxTextW) {
+                start++;
+            }
+            g2.setColor(Color.WHITE);
+            g2.drawString(text.substring(start), textStartX, searchY + 24);
+        }
 
         if (ui.iconArtist != null) g2.drawImage(ui.iconArtist, searchX + 12, searchY + (searchH - 20) / 2, 20, 20, null);
         if (ui.iconSearch != null) g2.drawImage(ui.iconSearch, searchX + searchW - 32, searchY + (searchH - 20) / 2, 20, 20, null);
-        if (ui.iconSettings != null) g2.drawImage(ui.iconSettings, w - pad - 28, searchY + (searchH - 24) / 2, 24, 24, null);
 
         // 2. LIBRARY CONTAINER
         g2.setColor(Color.decode("#2B2D31"));
@@ -49,29 +70,50 @@ public class LibraryView {
         if (ui.iconLibrary != null) g2.drawImage(ui.iconLibrary, pad + 25, contentY + 16, 24, 24, null);
 
         // --- NEW: DRAW THE SONG LIST ---
-        ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
+        ArrayList<Song> playlist = ui.musicHandler.searchSongs(ui.searchText);
         int listStartY = contentY + 75;
         int rowHeight = 30;
+        int totalContentHeight = playlist.size() * rowHeight;
+        ui.libraryViewportH = contentH - 95;
+        ui.maxScrollOffset = Math.max(0, totalContentHeight - ui.libraryViewportH);
+
+        Shape originalClip = g2.getClip();
         
         // Map the massive hitbox for the clicker over the entire list area
         if (ui.libraryListClicker != null) {
-            ui.libraryListClicker.setBounds(pad + 25, listStartY - 20, leftW - 50, playlist.size() * rowHeight);
+            ui.libraryListClicker.setBounds(
+                pad + 25, 
+                listStartY - 20 - ui.scrollOffset,
+                 leftW - 50, 
+                 totalContentHeight
+            );
         }
+        g2.setClip(pad + 10, listStartY - 20, leftW - 20, ui.libraryViewportH + 15);
 
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
+        int maxTextWidth = leftW - 60;
+
+        // Resolve the currently-playing song once, outside the loop
+        Song nowPlaying = (!ui.musicHandler.getPlaylist().isEmpty() && ui.currentSongIndex >= 0
+                && ui.currentSongIndex < ui.musicHandler.getPlaylist().size())
+                ? ui.musicHandler.getPlaylist().get(ui.currentSongIndex)
+                : null;
+
         for (int i = 0; i < playlist.size(); i++) {
             // Stop drawing if we reach the bottom of the container (No scrolling yet)
-            if (listStartY + (i * rowHeight) > contentY + contentH - 20) break; 
+           int currentRenderY = listStartY + (i * rowHeight) - ui.scrollOffset;
             
             Song s = playlist.get(i);
-            String display = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
+            String rawDisplay = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
+            String safeDisplay = UI.getClampedText(g2, rawDisplay, maxTextWidth);
 
-            // Highlight the currently playing song in Spotify Green
-            if (ui.currentSongIndex == i) g2.setColor(Color.decode("#1DB954"));
+            // Highlight the currently playing song in Spotify Green (compare by object, not index)
+            if (s == nowPlaying) g2.setColor(Color.decode("#1DB954"));
             else g2.setColor(Color.WHITE);
 
-            g2.drawString(display, pad + 25, listStartY + (i * rowHeight));
+            g2.drawString(safeDisplay, pad + 25, currentRenderY);
         }
+        g2.setClip(originalClip);
 
         // 3. PLAYLISTS CONTAINER (Unchanged)
         g2.setColor(Color.decode("#2B2D31"));
@@ -82,5 +124,24 @@ public class LibraryView {
         if (ui.iconAlbum != null) g2.drawImage(ui.iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
         g2.setFont(new Font("Inter", Font.BOLD, 16));
         g2.drawString("None", rightX + (rightW - g2.getFontMetrics().stringWidth("None")) / 2, contentY + (playlistsH / 2) + 10);
+        
+        // 4. SETTINGS 
+
+        int setX = w - pad - 28;
+        int setY = searchY + (searchH - 24) / 2;
+        int setW = 24;
+        int setH = 24;
+
+        // 2. Inject these physical coordinates into your smart button's hitbox
+        if (ui.iconSettings != null) {
+            // Pro-Tip: We subtract 4 from X/Y and add 8 to W/H to give it a slightly 
+            // larger invisible click box, making it much easier for a user to hit!
+            ui.settings.setBounds(setX - 4, setY - 4, setW + 8, setH + 8);
+        }
+
+        // 3. Draw the graphic using those exact same variables
+        if (ui.iconSettings != null) {
+            g2.drawImage(ui.iconSettings, setX, setY, setW, setH, null);
+            }
     }
 }
