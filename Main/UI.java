@@ -11,7 +11,7 @@ public class UI {
     Panel panel;
     Graphics2D g2;
     public boolean exit = false;
-    int exitX = 265, exitY = 355, exitW = 40, exitH = 20;
+    int exitX = 265, exitY = 355, exitW = 40, exitH = 20; //Coordinates for exit button
 
     //Arraylist for backend button coordinates
     private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
@@ -23,7 +23,7 @@ public class UI {
     public UI(Panel panel){
         this.panel = panel;
 
-        backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this));
+        backEndButtons.add(new ExitButton(exitX, exitY, exitW, exitH, panel, this)); //Child class added into arraylists
     }
 
     public ArrayList<ButtonManager> getBackendButtons() {
