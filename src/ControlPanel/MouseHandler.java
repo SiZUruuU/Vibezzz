@@ -37,38 +37,53 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             return;
         }
 
+        ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
+
         // 2. Check Play/Pause Button
         if (ui.playPauseBounds.contains(x, y)) {
-            ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
-            
             if (playlist.isEmpty()) {
-                // If playlist is empty, open the Folder Picker dialog!
                 ui.musicHandler.loadDynamicPlaylist();
-                
-                // If the user successfully loaded songs, auto-play the first one
                 if (!playlist.isEmpty()) {
                     ui.currentSongIndex = 0;
                     ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
                 }
             } else {
-                // Play / Pause / Resume Logic
                 if (ui.audioEngine.isPlaying()) {
                     ui.audioEngine.pauseTrack();
                 } else {
-                    // Try to resume the track if it was paused
                     ui.audioEngine.resumeTrack();
-                    
-                    // If resumeTrack did nothing (meaning no song was loaded yet), play from start
                     if (!ui.audioEngine.isPlaying()) {
                         ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
                     }
                 }
             }
-            panel.repaint(); // Force UI to update the Play/Pause icon visually
+            panel.repaint(); 
             return;
         }
 
-        // 3. Check normal backend buttons (like the top left Exit button)
+        // 3. Check Skip Forward Button
+        if (ui.skipFwdBounds.contains(x, y)) {
+            if (!playlist.isEmpty()) {
+                // Math to safely loop back to 0 if we hit the end of the playlist
+                ui.currentSongIndex = (ui.currentSongIndex + 1) % playlist.size();
+                ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
+                panel.repaint();
+            }
+            return;
+        }
+
+        // 4. Check Skip Back Button
+        if (ui.skipBackBounds.contains(x, y)) {
+            if (!playlist.isEmpty()) {
+                // Math to safely loop to the last song if we hit the beginning
+                ui.currentSongIndex = (ui.currentSongIndex - 1 + playlist.size()) % playlist.size();
+                ui.audioEngine.playTrack(playlist.get(ui.currentSongIndex).getAudioPath());
+                panel.repaint();
+            }
+            return;
+        }
+
+        // 5. Check normal backend buttons
         if (!ui.exit) {
             for (ButtonManager button : ui.getBackendButtons()) {
                 if (button.collisionCheck(x, y)) {

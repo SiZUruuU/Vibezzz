@@ -152,9 +152,17 @@ public class UI {
         g2.setColor(Color.decode("#2B2D31"));
         g2.fillRoundRect(rightX, playerY, rightW, playerH, 30, 30);
 
+        // Fetch dynamic song data
+        String trackTitle = "No Track Loaded";
+        String artistName = "Unknown Artist";
+        
+        if (!musicHandler.getPlaylist().isEmpty()) {
+            trackTitle = musicHandler.getPlaylist().get(currentSongIndex).getTitle();
+            artistName = musicHandler.getPlaylist().get(currentSongIndex).getArtist();
+        }
+
         g2.setFont(new Font("Inter", Font.BOLD, 16));
         FontMetrics fmTitle = g2.getFontMetrics();
-        String trackTitle = "Someday I'll Get it";
         int titleW = fmTitle.stringWidth(trackTitle);
         
         int songIconSize = 18;
@@ -168,7 +176,6 @@ public class UI {
         g2.setColor(Color.GRAY);
         g2.setFont(new Font("Inter", Font.PLAIN, 12));
         FontMetrics fmArtist = g2.getFontMetrics();
-        String artistName = "Alek Olsen";
         int artistW = fmArtist.stringWidth(artistName);
         g2.drawString(artistName, rightX + (rightW - artistW) / 2, titleY + 18);
     }

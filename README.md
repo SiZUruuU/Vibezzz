@@ -18,4 +18,4 @@ Meanwhile, the compiled output files will be generated in the `bin` folder by de
 The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
 
 
-BTW: if UnsupportedAudioFileException just expand the Java Projects tab under VIBEZZPROJECT got to Referenced Libraries and add the three libraries in the lib folder
+BTW: if UnsupportedAudioFileException just expand the Java Projects tab under VIBEZZPROJECT got to Referenced Libraries and add the three libraries in the lib foldergi
