@@ -48,6 +48,15 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
                 break;
             }
         }
+
+        // Search Bar
+        Point p = e.getPoint();
+
+        if(ui.searchBarBounds.contains(p)) {
+            ui.searchBarFocused = true;
+        } else {
+            ui.searchBarFocused = false;
+        }
     }
 
     @Override

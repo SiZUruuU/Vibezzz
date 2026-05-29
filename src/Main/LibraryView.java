@@ -3,7 +3,7 @@ package Main;
 import ControlPanel.Song;
 import java.awt.*;
 import java.util.ArrayList;
-import ControlPanel.SongClicker;
+
 
 public class LibraryView {
 
@@ -25,6 +25,7 @@ public class LibraryView {
         // 1. TOP HEADER / SEARCH BAR
         int searchW = (int) (w * 0.45);
         int searchX = (w - searchW) / 2;
+        ui.searchBarBounds.setBounds(searchX, searchY, searchW, searchH);
         g2.setColor(Color.decode("#313338"));
         g2.fillRoundRect(searchX, searchY, searchW, searchH, searchH, searchH);
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
@@ -34,20 +35,63 @@ public class LibraryView {
         int textMaxX   = searchX + searchW - 36;
         int maxTextW   = textMaxX - textStartX;
 
+        FontMetrics fm = g2.getFontMetrics();
+
+        if (ui.searchBarFocused) {
+            ui.panel.repaint();
+        }
+        
         if (ui.searchText.isEmpty()) {
-            // Placeholder
-            g2.setColor(new Color(160, 160, 160));
-            g2.drawString("Search songs...", textStartX, searchY + 24);
+
+            // EMPTY + NOT FOCUSED
+            if (!ui.searchBarFocused) {
+
+                g2.setColor(new Color(160, 160, 160));
+                g2.drawString("Search songs...", textStartX, searchY + 24);
+
+            }
+
+            // CARET ONLY WHEN FOCUSED
+            else {
+
+                long time = System.currentTimeMillis();
+
+                if ((time / 500) % 2 == 0) {
+
+                    int caretX = textStartX;
+                    int caretY = searchY + 8;
+
+                    g2.setColor(Color.WHITE);
+
+                    g2.fillRoundRect(caretX, caretY, 2, 20, 2, 2);
+                }
+            }
+
         } else {
-            // Show the TAIL of the typed text so the user always sees what they just typed
-            FontMetrics fm = g2.getFontMetrics();
+
             String text = ui.searchText;
             int start = 0;
-            while (start < text.length() && fm.stringWidth(text.substring(start)) > maxTextW) {
-                start++;
-            }
+
+            while (start < text.length() && fm.stringWidth(text.substring(start)) > maxTextW) { start++;}
+
+            String visibleText = text.substring(start);
+
             g2.setColor(Color.WHITE);
-            g2.drawString(text.substring(start), textStartX, searchY + 24);
+            g2.drawString(visibleText, textStartX, searchY + 24);
+
+            // CARET WHEN TYPING
+            if (ui.searchBarFocused) {
+
+                long time = System.currentTimeMillis();
+
+                if ((time / 500) % 2 == 0) {
+
+                    int caretX = textStartX + fm.stringWidth(visibleText) + 2;
+                    int caretY = searchY + 8;
+
+                    g2.fillRoundRect(caretX, caretY, 2, 20, 2, 2);
+                }
+            }
         }
 
         if (ui.iconArtist != null) g2.drawImage(ui.iconArtist, searchX + 12, searchY + (searchH - 20) / 2, 20, 20, null);
@@ -81,14 +125,15 @@ public class LibraryView {
         Shape originalClip = g2.getClip();
         
         // Map the massive hitbox for the clicker over the entire list area
-        //if (ui.libraryListClicker != null) {
-        //    ui.libraryListClicker.setBounds(
-        //        pad + 25,
-        //        listStartY - 20 - ui.scrollOffset,
-        //         leftW - 50,
-        //         totalContentHeight
-        //    );
-        //}
+        if (ui.libraryListClicker != null) {
+            ui.libraryListClicker.setBounds(
+                pad + 25,
+                listStartY - 20 - ui.scrollOffset,
+                 leftW - 50,
+                 totalContentHeight
+            );
+        
+        }
         g2.setClip(pad + 10, listStartY - 20, leftW - 20, ui.libraryViewportH + 15);
 
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
