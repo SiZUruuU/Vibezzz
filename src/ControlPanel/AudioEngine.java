@@ -101,14 +101,14 @@ public class AudioEngine {
     public void pauseTrack() {
         if (player != null && isThreadAlive && !isPaused) {
             isPaused = true;
-            if (volumeC != null) volumeC.pauseHardware(); // Instantly mute the OS buffer to prevent audio trailing
+            if (volumeC != null) volumeC.pauseHardware(); 
         }
     }
 
     public void resumeTrack() {
         if (player != null && isThreadAlive && isPaused) {
             isPaused = false;
-            if (volumeC != null) volumeC.resumeHardware(); // Instantly wake the OS buffer
+            if (volumeC != null) volumeC.resumeHardware(); 
         }
     }
 

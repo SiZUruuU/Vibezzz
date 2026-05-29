@@ -57,3 +57,5 @@ Library - Add Folder
 Select the music folder
 Wait for the metadata to load
 Done!
+
+p.s: if AudioEngine and VolumeController has some underlined red stuff dont worry it still runs - probably some library issue again.

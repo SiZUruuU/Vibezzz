@@ -49,7 +49,7 @@ public class VolumeController extends JavaSoundAudioDevice {
         try {
             
             Field field = JavaSoundAudioDevice.class.getDeclaredField("source");
-            field.setAccessible(true); // Bypass private encapsulation
+            field.setAccessible(true); 
             SourceDataLine line = (SourceDataLine) field.get(this);
             
            
@@ -63,7 +63,7 @@ public class VolumeController extends JavaSoundAudioDevice {
     
     public void resumeHardware() {
         try {
-            // Re-acquire the hidden hardware line
+
             Field field = JavaSoundAudioDevice.class.getDeclaredField("source");
             field.setAccessible(true);
             SourceDataLine line = (SourceDataLine) field.get(this);

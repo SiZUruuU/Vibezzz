@@ -30,15 +30,12 @@ public class AddSongButton extends ButtonManager {
     @Override
     public void execute(int mouseX, int mouseY) {
         
-        // 1. Guard clause: Ensure this button does absolutely nothing if we aren't inside a playlist
+
         if (!ui.insidePlaylistView) return;
         
-        // 2. Toggle the selection mode state (flips between false/true)
-        // This tells LibraryListClicker to intercept the next song click instead of playing it.
+
         ui.isAddingToPlaylist = !ui.isAddingToPlaylist; 
         
-        // 3. Request a screen update so the button visually changes to its active state
-        // (e.g., turning your custom accent color and changing text to "Select from Library...")
         panel.repaint();
     }
 }

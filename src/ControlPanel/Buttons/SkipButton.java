@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class SkipButton extends ButtonManager {
     
-    private boolean isForward; // true = Skip Forward, false = Skip Backward
+    private boolean isForward; 
 
 
     public SkipButton(Panel panel, UI ui, boolean isForward) {

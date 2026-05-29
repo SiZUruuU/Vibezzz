@@ -6,7 +6,7 @@ import Main.UI;
 
 public class SongClicker extends ButtonManager {
     
-    private Song song; // The specific audio file this button represents
+    private Song song; 
 
    
     public SongClicker(Panel panel, UI ui, Song song) {
