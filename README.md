@@ -59,3 +59,15 @@ Wait for the metadata to load
 Done!
 
 p.s: if AudioEngine and VolumeController has some underlined red stuff dont worry it still runs - probably some library issue again.
+
+=====Members and Contributions=====
+
+Mark Joshua A. Ihalas - Project Idea, Initial Code Structure, UI, Debugging, (Backend - Frontend)
+
+Markrey M. Shimizu - Core Features Implementation, Metadata Parsing, Finalized UI, Finalized Application (Finalized App)
+
+Emmanuel Calmerin - Main UI design and Integration (Main Frontend Dev)
+
+Jan Mikael Cangayda - Initial Code for Playlist View (Frontend Contributor)
+
+Jerry Dean Cabahug - Backend Libraries Integration, Music Database, Search Bar Functionality (Main Backend Dev)
