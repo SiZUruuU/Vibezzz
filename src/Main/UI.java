@@ -144,6 +144,10 @@ public class UI {
         if (exit) {
             PopupView.draw(g2, this, w, h);
         }
+
+        // for (ButtonManager btn : backEndButtons) {
+        //         if (btn != null) btn.drawDebug(g2);
+        //     }
     }
 
     public void exitInquiry() {
@@ -228,4 +232,5 @@ public class UI {
     
         return truncated.toString() + ellipsis;
     }
+
 }

@@ -35,7 +35,7 @@ public class LibraryView {
         g2.fillRoundRect(pad, contentY, leftW, contentH, 30, 30);
 
         // Map the Add Folder Hitbox to the top left text area
-        if (ui.addFolderButton != null) ui.addFolderButton.setBounds(pad + 20, contentY + 10, 150, 30);
+        if (ui.addFolderButton != null) ui.addFolderButton.setBounds(pad + 150, contentY + 23, 70, 15);
 
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Inter", Font.BOLD, 18));
