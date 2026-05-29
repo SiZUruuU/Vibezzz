@@ -4,9 +4,11 @@ Music playback is handled by the JLayer library.
 
 Basic track information (Title, Artist, and Duration) is read using Java's native javax.sound.sampled.AudioSystem. When a user selects a music folder, the app scans the directory, reads these properties, and converts the microsecond durations into standard MM:SS string formats.
 
-Instead of relying on an external library for album art, the app uses a custom binary parser built with java.io.RandomAccessFile. It opens the MP3 file at the byte level, reads the ID3v2 headers (calculating sync-safe integers), and hunts down the APIC (Attached Picture) frame. Once the raw image bytes are extracted, javax.imageio.ImageIO loads the image into memory and mathematically crops it into a perfect 1:1 square before caching it locally.
+Instead of relying on an external library for album art, the app uses a custom binary parser built with java.io.RandomAccessFile. It opens the MP3 file, reads the ID3v2 headers, and hunts down the APIC (Attached Picture) frame. Once the raw images are extracted, javax.imageio.ImageIO loads the image into and crops it into a perfect 1:1 square before caching it locally.
 
-The entire interface is drawn from scratch using standard Java Swing (JPanel and Graphics2D). Instead of attaching individual action listeners to dozens of buttons (which bloats memory), the app uses a single global MouseHandler. This handler tracks raw X/Y coordinates and uses basic collision math to route clicks, scroll events, and window drags to the appropriate custom hitboxes based on the current UI state.
+The entire interface is drawn from scratch using standard Java Swing (JPanel and Graphics2D). Instead of attaching individual action listeners to dozens of buttons (which bloats memory), the app uses a single global MouseHandler. This handler tracks raw X/Y coordinates to route clicks, scroll events, and window drags to the appropriate custom hitboxes based on the current UI state.
+
+Vibezz uses a lightweight text file to act as its memory. Every time you change a playlist or link a music folder, it saves those paths directly to your hard drive. When the app boots up, it reads that text file like a set of instructions, automatically reloading your library.
 
 
 
