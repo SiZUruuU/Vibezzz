@@ -1,30 +1,44 @@
 package ControlPanel.Buttons;
 
 import ControlPanel.ButtonManager;
-import ControlPanel.Song;
-import ControlPanel.SongClicker;
 import Main.Panel;
 import Main.UI;
-import javax.swing.JFileChooser;
-import java.util.ArrayList;
 
+/**
+ * Handles the state toggle for adding a song to a custom playlist.
+ * Rather than opening a file chooser, this button flips the UI into a 
+ * "selection mode," allowing the user to seamlessly pick a track directly 
+ * from their existing global library list.
+ */
 public class AddSongButton extends ButtonManager {
-    public AddSongButton(Panel panel, UI ui) { super(0, 0, 0, 0, panel, ui); }
 
+    /**
+     * Constructs the AddSongButton.
+     * @param panel The main application panel used to refresh the screen.
+     * @param ui    The main UI state manager.
+     */
+    public AddSongButton(Panel panel, UI ui) { 
+        // Bounds are initialized to 0; PlaylistView dynamically sets them during the draw phase.
+        super(0, 0, 0, 0, panel, ui); 
+    }
+
+    /**
+     * Executes the button's core logic.
+     * @param mouseX The X coordinate of the user's mouse click.
+     * @param mouseY The Y coordinate of the user's mouse click.
+     */
     @Override
     public void execute(int mouseX, int mouseY) {
+        
+        // 1. Guard clause: Ensure this button does absolutely nothing if we aren't inside a playlist
         if (!ui.insidePlaylistView) return;
-
-        JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            String path = chooser.getSelectedFile().getAbsolutePath();
-            // Create song and add to a map in UI
-            Song s = new Song(chooser.getSelectedFile().getName(), "Unknown", path, "NO_IMAGE", "0:00");
-
-            ui.playlistSongs.putIfAbsent(ui.selectedPlaylistName, new ArrayList<>());
-            ui.playlistSongs.get(ui.selectedPlaylistName).add(s);
-            ui.backEndButtons.add(new SongClicker(panel, ui, s));
-            panel.repaint();
-        }
+        
+        // 2. Toggle the selection mode state (flips between false/true)
+        // This tells LibraryListClicker to intercept the next song click instead of playing it.
+        ui.isAddingToPlaylist = !ui.isAddingToPlaylist; 
+        
+        // 3. Request a screen update so the button visually changes to its active state
+        // (e.g., turning your custom accent color and changing text to "Select from Library...")
+        panel.repaint();
     }
 }
