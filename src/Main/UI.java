@@ -50,6 +50,7 @@ public class UI {
     public int scrollOffset = 0;       
     public int maxScrollOffset = 0;   
     public int libraryViewportH = 0;
+    public String searchText = ""; // For search bar
     public boolean insidePlaylistView = false; // Tracks if we are "inside" a playlist window
     
     // --- HANDLERS ---
