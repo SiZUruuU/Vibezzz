@@ -13,12 +13,12 @@ public class AddPlaylistButton extends ButtonManager {
         String playlistName = JOptionPane.showInputDialog(null, "Enter Playlist Name:", "Create New Playlist", JOptionPane.PLAIN_MESSAGE);
         if (playlistName != null && !playlistName.trim().isEmpty()) {
             String cleanName = playlistName.trim();
-            if (ui.createdPlaylists.contains(cleanName)) {
+            if (ui.musicHandler.getCreatedPlaylists().contains(cleanName)) {
                 JOptionPane.showMessageDialog(null, "A playlist with that name already exists!", "Duplicate Name", JOptionPane.WARNING_MESSAGE);
                 return; 
             }
-            ui.createdPlaylists.add(cleanName);
-            ui.savePlaylists(); // SAVE HOOK
+            ui.musicHandler.getCreatedPlaylists().add(cleanName);
+            ui.musicHandler.savePlaylists();
             ui.refreshPlaylistButtons();
             panel.repaint();
         }

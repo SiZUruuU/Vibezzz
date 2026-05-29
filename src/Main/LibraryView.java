@@ -139,9 +139,9 @@ public class LibraryView {
         int maxTextWidth = leftW - 60;
 
         // Resolve the currently-playing song once, outside the loop
-        Song nowPlaying = (!ui.getActiveList().isEmpty() && ui.currentSongIndex >= 0
-                && ui.currentSongIndex < ui.getActiveList().size())
-                ? ui.getActiveList().get(ui.currentSongIndex)
+        Song nowPlaying = (!ui.musicHandler.getActiveList().isEmpty() && ui.currentSongIndex >= 0
+                && ui.currentSongIndex < ui.musicHandler.getActiveList().size())
+                ? ui.musicHandler.getActiveList().get(ui.currentSongIndex)
                 : null;
 
         for (int i = 0; i < playlist.size(); i++) {

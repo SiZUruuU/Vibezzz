@@ -31,9 +31,9 @@ public class PlayerView {
         // FETCH DYNAMIC DATA
         String trackTitle = "No Track Loaded";
         String artistName = "Unknown Artist";
-        if (!ui.getActiveList().isEmpty()) {
-            trackTitle = ui.getActiveList().get(ui.currentSongIndex).getTitle();
-            artistName = ui.getActiveList().get(ui.currentSongIndex).getArtist();
+        if (!ui.musicHandler.getActiveList().isEmpty()) {
+            trackTitle = ui.musicHandler.getActiveList().get(ui.currentSongIndex).getTitle();
+            artistName = ui.musicHandler.getActiveList().get(ui.currentSongIndex).getArtist();
         }
 
         // ALBUM ART
@@ -41,8 +41,8 @@ public class PlayerView {
         int artX = rightX + (rightW - artSize) / 2;
         int artY = playerY + 25;
 
-        if (!ui.getActiveList().isEmpty()) {
-            String imgPath = ui.getActiveList().get(ui.currentSongIndex).getImagePath();
+        if (!ui.musicHandler.getActiveList().isEmpty()) {
+            String imgPath = ui.musicHandler.getActiveList().get(ui.currentSongIndex).getImagePath();
             if (!imgPath.equals("NO_IMAGE")) {
                 Image albumCover = new ImageIcon(imgPath).getImage();
                 g2.drawImage(albumCover, artX, artY, artSize, artSize, null);

@@ -16,8 +16,8 @@ public class SongClicker extends ButtonManager {
     @Override
     public void execute(int mouseX, int mouseY) {
         // Sets queue strictly to THIS playlist
-        ui.activePlayingList = ui.playlistSongs.get(ui.selectedPlaylistName);
-        ui.currentSongIndex = ui.activePlayingList.indexOf(song);
+        ui.musicHandler.setActiveList(ui.musicHandler.getPlaylistSongs().get(ui.selectedPlaylistName));
+        ui.currentSongIndex = ui.musicHandler.getActiveList().indexOf(song);
         ui.audioEngine.playTrack(song.getAudioPath());
         panel.repaint();
     }

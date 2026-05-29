@@ -21,11 +21,11 @@ public class LibraryListClicker extends ButtonManager {
             ControlPanel.Song clickedSong = filtered.get(clickedIndex);
 
             if (ui.isAddingToPlaylist && ui.insidePlaylistView) {
-                ui.playlistSongs.putIfAbsent(ui.selectedPlaylistName, new java.util.ArrayList<>());
-                java.util.ArrayList<ControlPanel.Song> currentList = ui.playlistSongs.get(ui.selectedPlaylistName);
+                ui.musicHandler.getPlaylistSongs().putIfAbsent(ui.selectedPlaylistName, new java.util.ArrayList<>());
+                java.util.ArrayList<ControlPanel.Song> currentList = ui.musicHandler.getPlaylistSongs().get(ui.selectedPlaylistName);
                 if (!currentList.contains(clickedSong)) {
                     currentList.add(clickedSong);
-                    ui.savePlaylists(); // SAVE HOOK
+                    ui.musicHandler.savePlaylists(); // SAVE HOOK
                     ui.refreshPlaylistButtons(); 
                 }
                 ui.isAddingToPlaylist = false; 
@@ -34,8 +34,8 @@ public class LibraryListClicker extends ButtonManager {
             }
 
             // Sets queue to GLOBAL library
-            ui.activePlayingList = ui.musicHandler.getPlaylist();
-            ui.currentSongIndex = ui.activePlayingList.indexOf(clickedSong);
+            ui.musicHandler.setActiveList(ui.musicHandler.getPlaylist());
+            ui.currentSongIndex = ui.musicHandler.getActiveList().indexOf(clickedSong);
             ui.audioEngine.playTrack(clickedSong.getAudioPath());
             panel.repaint();
         }

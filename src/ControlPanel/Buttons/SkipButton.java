@@ -17,7 +17,7 @@ public class SkipButton extends ButtonManager {
     @Override
     public void execute(int mouseX, int mouseY) {
         // Asks UI for the correct Queue context!
-        ArrayList<Song> playlist = ui.getActiveList();
+        ArrayList<Song> playlist = ui.musicHandler.getActiveList();
         if (playlist.isEmpty()) return;
 
         if (isForward) {

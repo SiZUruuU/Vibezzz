@@ -47,7 +47,7 @@ public class PlaylistView {
             if (ui.addSongButton != null) ui.addSongButton.setBounds(rightX + rightW - textW - 30, contentY + playlistsH - 35, textW + 10, 20);
 
             // SCROLLING MATH FOR SONGS
-            int songCount = ui.playlistSongs.get(ui.selectedPlaylistName) != null ? ui.playlistSongs.get(ui.selectedPlaylistName).size() : 0;
+            int songCount = ui.musicHandler.getPlaylistSongs().get(ui.selectedPlaylistName) != null ? ui.musicHandler.getPlaylistSongs().get(ui.selectedPlaylistName).size() : 0;
             int rowHeight = 25;
             ui.playlistViewportH = playlistsH - 95; // Leaves space for the bottom buttons
             ui.maxPlaylistScrollOffset = Math.max(0, (songCount * rowHeight) - ui.playlistViewportH);
@@ -74,8 +74,8 @@ public class PlaylistView {
                     }
 
                     // Highlight if currently playing
-                    if (!ui.getActiveList().isEmpty() && ui.currentSongIndex >= 0 && ui.currentSongIndex < ui.getActiveList().size()) {
-                        if (s == ui.getActiveList().get(ui.currentSongIndex)) g2.setColor(Color.decode("#1DB954"));
+                    if (!ui.musicHandler.getActiveList().isEmpty() && ui.currentSongIndex >= 0 && ui.currentSongIndex < ui.musicHandler.getActiveList().size()) {
+                        if (s == ui.musicHandler.getActiveList().get(ui.currentSongIndex)) g2.setColor(Color.decode("#1DB954"));
                         else g2.setColor(Color.WHITE);
                     } else g2.setColor(Color.WHITE);
 
@@ -106,7 +106,7 @@ public class PlaylistView {
             if (ui.addPlaylistButton != null) ui.addPlaylistButton.setBounds(rightX + rightW - 70, contentY + 15, 60, 28);
 
             // SCROLLING MATH FOR PLAYLIST NAMES
-            int pCount = ui.createdPlaylists.size();
+            int pCount = ui.musicHandler.getCreatedPlaylists().size();
             int rowHeight = 25;
             ui.playlistViewportH = playlistsH - 55;
             ui.maxPlaylistScrollOffset = Math.max(0, (pCount * rowHeight) - ui.playlistViewportH);
@@ -124,7 +124,7 @@ public class PlaylistView {
                     
                     // Apply scroll offset
                     int yPos = contentY + 70 + (pIdx * rowHeight) - ui.playlistScrollOffset;
-                    String pName = ui.createdPlaylists.get(pIdx);
+                    String pName = ui.musicHandler.getCreatedPlaylists().get(pIdx);
 
                     // Map Hitbox safely
                     if (yPos > contentY + 30 && yPos < contentY + playlistsH) {

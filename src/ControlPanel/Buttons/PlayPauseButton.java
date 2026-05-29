@@ -9,7 +9,7 @@ public class PlayPauseButton extends ButtonManager {
 
     @Override
     public void execute(int mouseX, int mouseY) {
-        java.util.ArrayList<ControlPanel.Song> playlist = ui.getActiveList();
+        java.util.ArrayList<ControlPanel.Song> playlist = ui.musicHandler.getActiveList();
         if (playlist.isEmpty()) return; 
         
         if (ui.audioEngine.isPlaying()) {
