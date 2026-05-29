@@ -21,7 +21,11 @@ public class UI {
     // --- BUTTON LISTS FOR MOUSEHANDLER ---
     public ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
     private ArrayList<ButtonManager> popupButtons = new ArrayList<>();
-
+    // --- NEW: Active Queue & Persistence ---
+    public ArrayList<ControlPanel.Song> activePlayingList = new ArrayList<>();
+    public ArrayList<ControlPanel.Song> getActiveList() {
+        return (activePlayingList != null && !activePlayingList.isEmpty()) ? activePlayingList : musicHandler.getPlaylist();
+    }
     public java.util.Map<String, ArrayList<ControlPanel.Song>> playlistSongs = new java.util.HashMap<>();
 
     // --- SMART BUTTON INSTANCES ---
@@ -55,12 +59,18 @@ public class UI {
     public int libraryViewportH = 0;
     public String searchText = "";
     
+    public int playlistScrollOffset = 0;
+    public int maxPlaylistScrollOffset = 0;
+    public int playlistViewportH = 0;
+    
     public boolean searchBarFocused = false;
     public Rectangle searchBarBounds = new Rectangle();
     public boolean showCursor = true;
     public long lastCursorBlink = System.currentTimeMillis();
-    public boolean insidePlaylistView = false; // Tracks if we are "inside" a playlist window
-    
+    public boolean insidePlaylistView = false; 
+    public boolean isAddingToPlaylist = false; 
+    public ButtonManager backButton; 
+
     // --- HANDLERS ---
     public AudioEngine audioEngine = new AudioEngine();
     public MusicHandler musicHandler = new MusicHandler();
@@ -76,6 +86,16 @@ public class UI {
         this.panel = panel;
         loadAssets();
         initializeButtons();
+        audioEngine = new AudioEngine();
+        musicHandler = new MusicHandler();
+        
+        loadPlaylists(); // Load playlists immediately after music handler boots
+
+        // Bonus: Automatically trigger the Skip button when a track naturally finishes!
+        audioEngine.setTrackEndCallback(() -> {
+            if (skipFwdButton != null) skipFwdButton.execute(0, 0); 
+        });
+
 
         // Repaint loop for the progress bar and marquee animations
         Timer timer = new Timer(50, e -> {
@@ -100,6 +120,8 @@ public class UI {
         volumeSlider = new VolumeSlider(panel, this); // Instantiate the slider
         addPlaylistButton = new AddPlaylistButton(panel, this); //Instantiates the Playlist butto
         addSongButton = new AddSongButton(panel, this);
+        backButton = new ControlPanel.Buttons.BackButton(panel, this);
+        backEndButtons.add(backButton);
 
 
         backEndButtons.add(addFolderButton);
@@ -151,6 +173,7 @@ public class UI {
 
         // Let the Views handle the heavy lifting!
         LibraryView.draw(g2, this, w, h);
+        PlaylistView.draw(g2, this, w, h);
         PlayerView.draw(g2, this, w, h);
 
         if(settingsPressed) {
@@ -175,14 +198,22 @@ public class UI {
 
     }
 
-    // Add this method to UI.java
     public void refreshPlaylistButtons() {
-        // Remove old ones
-        backEndButtons.removeIf(b -> b instanceof ControlPanel.Buttons.PlaylistClicker);
 
-        // Add new ones with names
+        backEndButtons.removeIf(b -> b instanceof ControlPanel.Buttons.PlaylistClicker || b instanceof ControlPanel.SongClicker);
+
+        // Rebuild the menu hitboxes
         for (String name : createdPlaylists) {
             backEndButtons.add(new ControlPanel.Buttons.PlaylistClicker(panel, this, name));
+        }
+
+        if (insidePlaylistView && selectedPlaylistName != null && !selectedPlaylistName.isEmpty()) {
+            ArrayList<ControlPanel.Song> songs = playlistSongs.get(selectedPlaylistName);
+            if (songs != null) {
+                for (ControlPanel.Song s : songs) {
+                    backEndButtons.add(new ControlPanel.SongClicker(panel, this, s));
+                }
+            }
         }
     }
 
@@ -273,4 +304,52 @@ public class UI {
         // Restores the original limits after drawing this one string
         g2.setClip(oldClip); 
     }
+
+    public void savePlaylists() {
+        try (java.io.PrintWriter out = new java.io.PrintWriter("vibezz_playlists.txt")) {
+            for (String pName : createdPlaylists) {
+                out.println("[PLAYLIST] " + pName);
+                ArrayList<ControlPanel.Song> songs = playlistSongs.get(pName);
+                if (songs != null) {
+                    for (ControlPanel.Song s : songs) {
+                        out.println(s.getAudioPath()); // We only need to save the file path!
+                    }
+                }
+            }
+        } catch (Exception e) { }
+    }
+
+    public void loadPlaylists() {
+        createdPlaylists.clear();
+        playlistSongs.clear();
+        try {
+            java.io.File file = new java.io.File("vibezz_playlists.txt");
+            if (!file.exists()) return;
+            
+            java.util.Scanner scanner = new java.util.Scanner(file);
+            String currentPlaylist = null;
+            
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+                if (line.isEmpty()) continue;
+                
+                if (line.startsWith("[PLAYLIST] ")) {
+                    currentPlaylist = line.substring(11);
+                    createdPlaylists.add(currentPlaylist);
+                    playlistSongs.put(currentPlaylist, new ArrayList<>());
+                } else if (currentPlaylist != null) {
+                    // Match the saved path to the actual Song objects loaded by MusicHandler
+                    for (ControlPanel.Song s : musicHandler.getPlaylist()) {
+                        if (s.getAudioPath().equals(line)) {
+                            playlistSongs.get(currentPlaylist).add(s);
+                            break;
+                        }
+                    }
+                }
+            }
+            scanner.close();
+            refreshPlaylistButtons();
+        } catch (Exception e) {}
+    }
+
 }

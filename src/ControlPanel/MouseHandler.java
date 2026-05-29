@@ -128,23 +128,30 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        // Only scroll if the settings panel isn't blocking the view
         if (!ui.settingsPressed) {
-            int scrollSpeed = 15; // Number of pixels moved per wheel notch click
+            int scrollSpeed = 15; 
             
-            // e.getWheelRotation() returns 1 for scrolling down, -1 for scrolling up
-            ui.scrollOffset += e.getWheelRotation() * scrollSpeed;
+            // Calculate where the dividing line between the two boxes is
+            int w = panel.getWidth();
+            int pad = 25;
+            int gap = 20;
+            int totalWidth = w - (pad * 2) - gap;
+            int leftW = (int) (totalWidth * 0.60);
+            int dividerX = pad + leftW + (gap / 2);
 
-            // Clamp the scroll position so the user can't scroll past the top (0) 
-            // or past the bottom bounds (maxScrollOffset)
-            if (ui.scrollOffset < 0) {
-                ui.scrollOffset = 0;
-            }
-            if (ui.scrollOffset > ui.maxScrollOffset) {
-                ui.scrollOffset = ui.maxScrollOffset;
+            // If mouse is on the LEFT, scroll the Library
+            if (e.getX() < dividerX) {
+                ui.scrollOffset += e.getWheelRotation() * scrollSpeed;
+                if (ui.scrollOffset < 0) ui.scrollOffset = 0;
+                if (ui.scrollOffset > ui.maxScrollOffset) ui.scrollOffset = ui.maxScrollOffset;
+            } 
+            // If mouse is on the RIGHT, scroll the Playlist
+            else {
+                ui.playlistScrollOffset += e.getWheelRotation() * scrollSpeed;
+                if (ui.playlistScrollOffset < 0) ui.playlistScrollOffset = 0;
+                if (ui.playlistScrollOffset > ui.maxPlaylistScrollOffset) ui.playlistScrollOffset = ui.maxPlaylistScrollOffset;
             }
 
-            // Request a redraw to update text rendering positions instantly
             panel.repaint();
         }
     }

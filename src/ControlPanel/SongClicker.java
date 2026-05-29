@@ -11,9 +11,14 @@ public class SongClicker extends ButtonManager {
         this.song = song;
     }
 
+    public Song getSong() { return song; } 
+
     @Override
     public void execute(int mouseX, int mouseY) {
-        // Since UI has 'public AudioEngine audioEngine', we reach it through 'ui'
+        // Sets queue strictly to THIS playlist
+        ui.activePlayingList = ui.playlistSongs.get(ui.selectedPlaylistName);
+        ui.currentSongIndex = ui.activePlayingList.indexOf(song);
         ui.audioEngine.playTrack(song.getAudioPath());
+        panel.repaint();
     }
 }

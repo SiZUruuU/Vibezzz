@@ -15,12 +15,10 @@ public class PlaylistClicker extends ButtonManager {
     @Override
     public void execute(int mouseX, int mouseY) {
         if (!ui.insidePlaylistView) {
-            ui.selectedPlaylistName = this.playlistName; // Sets the name when entering
+            ui.selectedPlaylistName = this.playlistName; 
             ui.insidePlaylistView = true;
-        } else {
-            ui.insidePlaylistView = false;
-            ui.selectedPlaylistName = "";
+            ui.refreshPlaylistButtons();
+            panel.repaint();
         }
-        panel.repaint();
     }
 }
