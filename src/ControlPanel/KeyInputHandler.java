@@ -17,7 +17,12 @@ public class KeyInputHandler implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
+        char c = e.getKeyChar();
 
+        if (Character.isLetterOrDigit(c) || Character.isWhitespace(c)) {            
+                ui.searchText += c;
+                panel.repaint();
+        }
     }
 
     @Override
@@ -27,6 +32,11 @@ public class KeyInputHandler implements KeyListener {
 
         if(code == KeyEvent.VK_ESCAPE){
             panel.exitInquiry();
+        }
+
+        if(code == KeyEvent.VK_BACK_SPACE && !ui.searchText.isEmpty()) {
+            ui.searchText = ui.searchText.substring(0, ui.searchText.length() - 1);
+            panel.repaint();
         }
     }
 
