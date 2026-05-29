@@ -5,6 +5,7 @@ import ControlPanel.ButtonManager;
 import ControlPanel.Buttons.*;
 import ControlPanel.MusicHandler; // Assumes you created the specific button classes here
 import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.Timer;
@@ -50,7 +51,12 @@ public class UI {
     public int scrollOffset = 0;       
     public int maxScrollOffset = 0;   
     public int libraryViewportH = 0;
-    public String searchText = ""; // For search bar
+    public String searchText = "";
+    
+    public boolean searchBarFocused = false;
+    public Rectangle searchBarBounds = new Rectangle();
+    public boolean showCursor = true;
+    public long lastCursorBlink = System.currentTimeMillis();
     public boolean insidePlaylistView = false; // Tracks if we are "inside" a playlist window
     
     // --- HANDLERS ---
