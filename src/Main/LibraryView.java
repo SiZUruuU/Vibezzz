@@ -81,14 +81,15 @@ public class LibraryView {
         Shape originalClip = g2.getClip();
         
         // Map the massive hitbox for the clicker over the entire list area
-        //if (ui.libraryListClicker != null) {
-        //    ui.libraryListClicker.setBounds(
-        //        pad + 25,
-        //        listStartY - 20 - ui.scrollOffset,
-        //         leftW - 50,
-        //         totalContentHeight
-        //    );
-        //}
+        if (ui.libraryListClicker != null) {
+            ui.libraryListClicker.setBounds(
+                pad + 25,
+                listStartY - 20 - ui.scrollOffset,
+                 leftW - 50,
+                 totalContentHeight
+            );
+        }
+        
         g2.setClip(pad + 10, listStartY - 20, leftW - 20, ui.libraryViewportH + 15);
 
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
