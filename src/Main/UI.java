@@ -196,11 +196,25 @@ public class UI {
         int w = panel.getWidth();
         int h = panel.getHeight();
 
-        // --- DRAW LAYERS (Bottom to Top) ---
+        // --- 1. DRAW BASE LAYERS ---
         LibraryView.draw(g2, this, w, h);
         PlaylistView.draw(g2, this, w, h); 
         PlayerView.draw(g2, this, w, h);
 
+        // --- 2. DRAW SETTINGS GEAR (Top Right Corner) ---
+        int gearSize = 20;
+        int gearX = w - 45;
+        int gearY = 25;
+        
+        if (iconSettings != null) {
+            g2.drawImage(iconSettings, gearX, gearY, gearSize, gearSize, null);
+        }
+        if (settings != null) {
+            // Give the hitbox a little 5px padding so it's easier to click!
+            settings.setBounds(gearX - 5, gearY - 5, gearSize + 10, gearSize + 10); 
+        }
+
+        // --- 3. DRAW POPUPS OVERLAYS ---
         if (settingsPressed) VolumeView.draw(g2, this, w, h);
         if (exit) PopupView.draw(g2, this, w, h);
         
@@ -217,33 +231,47 @@ public class UI {
     }
 
     /**
+     * A bulletproof helper method to load images safely.
+     * If an image is missing, it prints a helpful warning to the console instead of crashing.
+     */
+    private Image loadImage(String path) {
+        try {
+            java.net.URL url = getClass().getResource(path);
+            if (url != null) {
+                return new ImageIcon(url).getImage();
+            } else {
+                System.out.println("⚠️ Warning: Could not find image at " + path);
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Error loading image at " + path);
+            return null;
+        }
+    }
+
+    /**
      * Loads all graphical assets into memory during application boot.
      */
     private void loadAssets() {
-        try {
-            iconLibrary     = new ImageIcon(getClass().getResource("/assets/Library.png")).getImage();
-            iconAlbum       = new ImageIcon(getClass().getResource("/assets/Album.png")).getImage();
-            iconArtist      = new ImageIcon(getClass().getResource("/assets/Artist.png")).getImage();
-            iconSong        = new ImageIcon(getClass().getResource("/assets/Song.png")).getImage();
-            iconPlay        = new ImageIcon(getClass().getResource("/assets/Play.png")).getImage();
-            iconPause       = new ImageIcon(getClass().getResource("/assets/Pause.png")).getImage();
-            iconFastFwd     = new ImageIcon(getClass().getResource("/assets/Fast Fwd.png")).getImage();
-            iconMute        = new ImageIcon(getClass().getResource("/assets/Mute.png")).getImage();
-            imgProgressBar  = new ImageIcon(getClass().getResource("/assets/Line 1.png")).getImage();
-            imgProgressKnob = new ImageIcon(getClass().getResource("/assets/Ellipse 1.png")).getImage();
-            iconRepeat      = new ImageIcon(getClass().getResource("/assets/Repeat.png")).getImage();
-            iconRewind      = new ImageIcon(getClass().getResource("/assets/Rewind.png")).getImage();
-            iconSearch      = new ImageIcon(getClass().getResource("/assets/Search.png")).getImage();
-            iconSettings    = new ImageIcon(getClass().getResource("/assets/Settings.png")).getImage();
-            iconShuffle     = new ImageIcon(getClass().getResource("/assets/Shuffle.png")).getImage();
-            iconSkipBack    = new ImageIcon(getClass().getResource("/assets/Skip Back.png")).getImage();
-            iconSkipFwd     = new ImageIcon(getClass().getResource("/assets/Skip Fwd.png")).getImage();
-            iconVolDown     = new ImageIcon(getClass().getResource("/assets/Volume Down.png")).getImage();
-            iconVolUp       = new ImageIcon(getClass().getResource("/assets/Volume Up.png")).getImage();
-            
-        } catch (Exception e) {
-            System.out.println("Failed to load images. Make sure your '/assets/' folder exists and file names are exact.");
-        }
+        iconLibrary     = loadImage("/assets/Library.png");
+        iconAlbum       = loadImage("/assets/Album.png");
+        iconArtist      = loadImage("/assets/Artist.png");
+        iconSong        = loadImage("/assets/Song.png");
+        iconPlay        = loadImage("/assets/Play.png");
+        iconPause       = loadImage("/assets/Pause.png");
+        iconFastFwd     = loadImage("/assets/Fast Fwd.png");
+        iconMute        = loadImage("/assets/Mute.png");
+        imgProgressBar  = loadImage("/assets/Line 1.png");
+        imgProgressKnob = loadImage("/assets/Ellipse 1.png");
+        iconRepeat      = loadImage("/assets/Repeat.png");
+        iconRewind      = loadImage("/assets/Rewind.png");
+        iconSearch      = loadImage("/assets/Search.png");
+        iconSettings    = loadImage("/assets/Settings.png");
+        iconShuffle     = loadImage("/assets/Shuffle.png");
+        iconSkipBack    = loadImage("/assets/Skip Back.png");
+        iconSkipFwd     = loadImage("/assets/Skip Fwd.png");
+        iconVolDown     = loadImage("/assets/Volume Down.png");
+        iconVolUp       = loadImage("/assets/Volume Up.png");
     }
 
     /**
