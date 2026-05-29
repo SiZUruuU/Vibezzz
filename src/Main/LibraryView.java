@@ -26,6 +26,28 @@ public class LibraryView {
         int searchX = (w - searchW) / 2;
         g2.setColor(Color.decode("#313338"));
         g2.fillRoundRect(searchX, searchY, searchW, searchH, searchH, searchH);
+        g2.setFont(new Font("Inter", Font.PLAIN, 13));
+
+        // Available text area: after left icon (40px) and before right icon (36px)
+        int textStartX = searchX + 40;
+        int textMaxX   = searchX + searchW - 36;
+        int maxTextW   = textMaxX - textStartX;
+
+        if (ui.searchText.isEmpty()) {
+            // Placeholder
+            g2.setColor(new Color(160, 160, 160));
+            g2.drawString("Search songs...", textStartX, searchY + 24);
+        } else {
+            // Show the TAIL of the typed text so the user always sees what they just typed
+            FontMetrics fm = g2.getFontMetrics();
+            String text = ui.searchText;
+            int start = 0;
+            while (start < text.length() && fm.stringWidth(text.substring(start)) > maxTextW) {
+                start++;
+            }
+            g2.setColor(Color.WHITE);
+            g2.drawString(text.substring(start), textStartX, searchY + 24);
+        }
 
         if (ui.iconArtist != null) g2.drawImage(ui.iconArtist, searchX + 12, searchY + (searchH - 20) / 2, 20, 20, null);
         if (ui.iconSearch != null) g2.drawImage(ui.iconSearch, searchX + searchW - 32, searchY + (searchH - 20) / 2, 20, 20, null);
@@ -48,7 +70,7 @@ public class LibraryView {
         if (ui.iconLibrary != null) g2.drawImage(ui.iconLibrary, pad + 25, contentY + 16, 24, 24, null);
 
         // --- NEW: DRAW THE SONG LIST ---
-        ArrayList<Song> playlist = ui.musicHandler.getPlaylist();
+        ArrayList<Song> playlist = ui.musicHandler.searchSongs(ui.searchText);
         int listStartY = contentY + 75;
         int rowHeight = 30;
         int totalContentHeight = playlist.size() * rowHeight;
@@ -71,6 +93,12 @@ public class LibraryView {
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
         int maxTextWidth = leftW - 60;
 
+        // Resolve the currently-playing song once, outside the loop
+        Song nowPlaying = (!ui.musicHandler.getPlaylist().isEmpty() && ui.currentSongIndex >= 0
+                && ui.currentSongIndex < ui.musicHandler.getPlaylist().size())
+                ? ui.musicHandler.getPlaylist().get(ui.currentSongIndex)
+                : null;
+
         for (int i = 0; i < playlist.size(); i++) {
             // Stop drawing if we reach the bottom of the container (No scrolling yet)
            int currentRenderY = listStartY + (i * rowHeight) - ui.scrollOffset;
@@ -79,8 +107,8 @@ public class LibraryView {
             String rawDisplay = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
             String safeDisplay = UI.getClampedText(g2, rawDisplay, maxTextWidth);
 
-            // Highlight the currently playing song in Spotify Green
-            if (ui.currentSongIndex == i) g2.setColor(Color.decode("#1DB954"));
+            // Highlight the currently playing song in Spotify Green (compare by object, not index)
+            if (s == nowPlaying) g2.setColor(Color.decode("#1DB954"));
             else g2.setColor(Color.WHITE);
 
             g2.drawString(safeDisplay, pad + 25, currentRenderY);
