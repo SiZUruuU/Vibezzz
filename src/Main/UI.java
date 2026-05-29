@@ -11,13 +11,15 @@ import javax.swing.Timer;
 
 public class UI {
 
-    Panel panel;
+    public Panel panel;
     public boolean exit = false;
     public boolean escInq = false;
 
     // --- BUTTON LISTS FOR MOUSEHANDLER ---
-    private ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
+    public ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
     private ArrayList<ButtonManager> popupButtons = new ArrayList<>();
+
+    public java.util.Map<String, ArrayList<ControlPanel.Song>> playlistSongs = new java.util.HashMap<>();
 
     // --- SMART BUTTON INSTANCES ---
     // These start with 0 bounds; PlayerView and PopupView will map them dynamically!
@@ -32,6 +34,8 @@ public class UI {
     public ButtonManager addFolderButton;
     public ButtonManager libraryListClicker;
     public ButtonManager settings;
+    public ButtonManager addPlaylistButton;
+    public ButtonManager addSongButton;
 
     // --- OBJECTS ---
 
@@ -46,6 +50,7 @@ public class UI {
     public int scrollOffset = 0;       
     public int maxScrollOffset = 0;   
     public int libraryViewportH = 0;
+    public boolean insidePlaylistView = false; // Tracks if we are "inside" a playlist window
     
     // --- HANDLERS ---
     public AudioEngine audioEngine = new AudioEngine();
@@ -85,6 +90,9 @@ public class UI {
         libraryListClicker = new LibraryListClicker(panel, this);
         settings = new SettingsButton(panel, this); 
         volumeSlider = new VolumeSlider(panel, this); // Instantiate the slider
+        addPlaylistButton = new AddPlaylistButton(panel, this); //Instantiates the Playlist butto
+        addSongButton = new AddSongButton(panel, this);
+
 
         backEndButtons.add(addFolderButton);
         backEndButtons.add(libraryListClicker);
@@ -95,7 +103,9 @@ public class UI {
         backEndButtons.add(repeatButton);
         backEndButtons.add(shuffleButton);
         backEndButtons.add(settings);
-        backEndButtons.add(volumeSlider); 
+        backEndButtons.add(volumeSlider);
+        backEndButtons.add(addPlaylistButton);
+        backEndButtons.add(addSongButton);
 
         exitYesButton = new ExitPopupButton(panel, this, true);
         exitNoButton = new ExitPopupButton(panel, this, false);
@@ -109,6 +119,9 @@ public class UI {
             }
         });
     }
+
+    public ArrayList<String> createdPlaylists = new ArrayList<>();
+    public String selectedPlaylistName = "";   //Playlist tracking
 
     public ArrayList<ButtonManager> getBackendButtons() {
         return backEndButtons;
@@ -143,6 +156,17 @@ public class UI {
 
         if (exit) {
             PopupView.draw(g2, this, w, h);
+        }
+    }
+
+    // Add this method to UI.java
+    public void refreshPlaylistButtons() {
+        // Remove old ones
+        backEndButtons.removeIf(b -> b instanceof ControlPanel.Buttons.PlaylistClicker);
+
+        // Add new ones with names
+        for (String name : createdPlaylists) {
+            backEndButtons.add(new ControlPanel.Buttons.PlaylistClicker(panel, this, name));
         }
     }
 

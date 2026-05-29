@@ -3,6 +3,7 @@ package Main;
 import ControlPanel.Song;
 import java.awt.*;
 import java.util.ArrayList;
+import ControlPanel.SongClicker;
 
 public class LibraryView {
 
@@ -80,14 +81,14 @@ public class LibraryView {
         Shape originalClip = g2.getClip();
         
         // Map the massive hitbox for the clicker over the entire list area
-        if (ui.libraryListClicker != null) {
-            ui.libraryListClicker.setBounds(
-                pad + 25, 
-                listStartY - 20 - ui.scrollOffset,
-                 leftW - 50, 
-                 totalContentHeight
-            );
-        }
+        //if (ui.libraryListClicker != null) {
+        //    ui.libraryListClicker.setBounds(
+        //        pad + 25,
+        //        listStartY - 20 - ui.scrollOffset,
+        //         leftW - 50,
+        //         totalContentHeight
+        //    );
+        //}
         g2.setClip(pad + 10, listStartY - 20, leftW - 20, ui.libraryViewportH + 15);
 
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
@@ -115,16 +116,108 @@ public class LibraryView {
         }
         g2.setClip(originalClip);
 
-        // 3. PLAYLISTS CONTAINER (Unchanged)
+
+
+        // 3. PLAYLISTS CONTAINER
         g2.setColor(Color.decode("#2B2D31"));
         g2.fillRoundRect(rightX, contentY, rightW, playlistsH, 30, 30);
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Inter", Font.BOLD, 18));
-        g2.drawString("PLAYLISTS", rightX + 60, contentY + 35);
-        if (ui.iconAlbum != null) g2.drawImage(ui.iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
-        g2.setFont(new Font("Inter", Font.BOLD, 16));
-        g2.drawString("None", rightX + (rightW - g2.getFontMetrics().stringWidth("None")) / 2, contentY + (playlistsH / 2) + 10);
-        
+
+        if (ui.insidePlaylistView) {
+            g2.drawString(ui.selectedPlaylistName.toUpperCase(), rightX + 60, contentY + 35);
+        } else {
+            g2.drawString("PLAYLISTS", rightX + 60, contentY + 35);
+        }
+
+        if (ui.iconAlbum != null) {
+            g2.drawImage(ui.iconAlbum, rightX + 25, contentY + 16, 24, 24, null);
+        }
+
+        if (ui.insidePlaylistView) {
+            ui.addSongButton.setBounds(rightX + 25, contentY + playlistsH - 80, 100, 30);
+        } else {
+            ui.addSongButton.setBounds(-100, -100, 0, 0);
+        }
+
+        // Button Hit boxes
+        for (ControlPanel.ButtonManager btn : ui.getBackendButtons()) {
+            if (btn.getClass().getName().endsWith("PlaylistClicker")) {
+                if (ui.insidePlaylistView) {
+                    btn.setBounds(rightX + 20, contentY + playlistsH - 45, 80, 30);
+                } else {
+                    int listHeight = Math.max(50, ui.createdPlaylists.size() * 30);
+                    btn.setBounds(rightX, contentY + 50, rightW, listHeight);
+                }
+            }
+        }
+        if (ui.insidePlaylistView) {
+            ArrayList<ControlPanel.Song> songs = ui.playlistSongs.get(ui.selectedPlaylistName);
+            if (songs != null) {
+                int songIdx = 0;
+                for (ControlPanel.ButtonManager btn : ui.getBackendButtons()) {
+                    // Check if this specific button is a SongClicker
+                    if (btn instanceof ControlPanel.SongClicker) {
+                        // Ensure the Y position is exactly where the string is drawn
+                        btn.setBounds(rightX, contentY + 65 + (songIdx * 25), rightW, 20);
+                        songIdx++;
+                    }
+                }
+            }
+        }
+
+        // Drawing for buttons and text
+
+        if (ui.insidePlaylistView) {
+            g2.setColor(Color.GRAY);
+            g2.setFont(new Font("Inter", Font.BOLD, 12));
+            g2.drawString("< Back", rightX + 25, contentY + playlistsH - 25);
+        } else {
+            g2.setColor(Color.GRAY);
+            g2.setFont(new Font("Inter", Font.PLAIN, 11));
+            g2.drawString("Create", rightX + rightW - 60, contentY + 26);
+            g2.drawString("Playlist", rightX + rightW - 60, contentY + 39);
+
+            if (ui.addPlaylistButton != null) {
+                ui.addPlaylistButton.setBounds(rightX + rightW - 100, contentY + 15, 80, 28);
+            }
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Inter", Font.PLAIN, 14));
+            for (int i = 0; i < ui.createdPlaylists.size(); i++) {
+                g2.drawString((i + 1) + ".  " + ui.createdPlaylists.get(i), rightX + 25, contentY + 70 + (i * 25));
+            }
+        }
+        if (ui.insidePlaylistView) {
+            // Draw the "Add Song" button label
+            g2.setColor(Color.WHITE);
+            g2.drawString("Add Song", rightX + 45, contentY + playlistsH - 60);
+
+            // Draw the list of songs
+            ArrayList<ControlPanel.Song> songs = ui.playlistSongs.get(ui.selectedPlaylistName);
+            if (songs != null) {
+                for (int i = 0; i < songs.size(); i++) {
+                    g2.drawString(songs.get(i).getTitle(), rightX + 25, contentY + 70 + (i * 25));
+                }
+            }
+        }
+
+        // In LibraryView.java
+        // Offsetter
+        int pIdx = 0;
+        int verticalOffset = 10;
+        for (ControlPanel.ButtonManager btn : ui.getBackendButtons()) {
+            if (btn instanceof ControlPanel.Buttons.PlaylistClicker) {
+                if (!ui.insidePlaylistView) {
+                    int yPos = contentY + 70 + (pIdx * 25) - verticalOffset;
+
+                    btn.setBounds(rightX, yPos, rightW, 20);
+                    pIdx++;
+                }
+            }
+        }
+
+
         // 4. SETTINGS 
 
         int setX = w - pad - 28;
