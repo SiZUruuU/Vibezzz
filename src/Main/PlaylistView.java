@@ -40,7 +40,7 @@ public class PlaylistView {
             if (ui.backButton != null) ui.backButton.setBounds(rightX + 20, contentY + playlistsH - 35, 60, 20);
 
             // "Add Song" Button 
-            g2.setColor(ui.isAddingToPlaylist ? Color.decode("#1DB954") : Color.WHITE);
+            g2.setColor(ui.isAddingToPlaylist ? Color.decode("#BB86FC") : Color.WHITE);
             String addText = ui.isAddingToPlaylist ? "Select from Library..." : "+ Add Song";
             int textW = g2.getFontMetrics().stringWidth(addText);
             g2.drawString(addText, rightX + rightW - textW - 25, contentY + playlistsH - 20);
@@ -75,7 +75,7 @@ public class PlaylistView {
 
                     // Highlight if currently playing
                     if (!ui.musicHandler.getActiveList().isEmpty() && ui.currentSongIndex >= 0 && ui.currentSongIndex < ui.musicHandler.getActiveList().size()) {
-                        if (s == ui.musicHandler.getActiveList().get(ui.currentSongIndex)) g2.setColor(Color.decode("#1DB954"));
+                        if (s == ui.musicHandler.getActiveList().get(ui.currentSongIndex)) g2.setColor(Color.decode("#BB86FC"));
                         else g2.setColor(Color.WHITE);
                     } else g2.setColor(Color.WHITE);
 

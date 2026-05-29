@@ -114,7 +114,7 @@ public class PlayerView {
                 if (i == 0) { 
                     if(ui.repeatButton != null) ui.repeatButton.setBounds(cx, ctrlY, iconWidth, iconWidth);
                     if (ui.isRepeat) {
-                        g2.setColor(Color.decode("#1DB954"));
+                        g2.setColor(Color.decode("#BB86FC"));
                         g2.fillOval(cx + (iconWidth / 2) - 2, ctrlY + iconWidth + 4, 4, 4);
                     }
                 } else if (i == 1) { 
@@ -127,7 +127,7 @@ public class PlayerView {
                 } else if (i == 4) { 
                     if(ui.shuffleButton != null) ui.shuffleButton.setBounds(cx, ctrlY, iconWidth, iconWidth);
                     if (ui.isShuffle) {
-                        g2.setColor(Color.decode("#1DB954")); 
+                        g2.setColor(Color.decode("#BB86FC")); 
                         g2.fillOval(cx + (iconWidth / 2) - 2, ctrlY + iconWidth + 4, 4, 4);
                     }
                 }

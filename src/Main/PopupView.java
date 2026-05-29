@@ -33,7 +33,7 @@ public class PopupView {
         int btnY = y + 60;
 
         // YES BUTTON
-        g2.setColor(Color.decode("#5865F2"));
+        g2.setColor(Color.decode("#BB86FC"));
         g2.fillRoundRect(startX, btnY, btnW, btnH, 15, 15);
         
         g2.setColor(Color.WHITE);
@@ -43,7 +43,7 @@ public class PopupView {
 
         // NO BUTTON
         int noX = startX + btnW + space;
-        g2.setColor(Color.decode("#5865F2"));
+        g2.setColor(Color.decode("#BB86FC"));
         g2.fillRoundRect(noX, btnY, btnW, btnH, 15, 15);
         
         g2.setColor(Color.WHITE);

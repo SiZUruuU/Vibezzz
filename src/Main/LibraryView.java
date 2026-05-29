@@ -151,7 +151,7 @@ public class LibraryView {
             String rawDisplay = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
 
             // Highlight the currently playing song in Spotify Green (compare by object, not index)
-            if (s == nowPlaying) g2.setColor(Color.decode("#1DB954"));
+            if (s == nowPlaying) g2.setColor(Color.decode("#BB86FC"));
             else g2.setColor(Color.WHITE);
 
             // FIX: Render smoothly with Ping-Pong Marquee

@@ -51,7 +51,7 @@ public class VolumeView {
         float currentVol = ui.audioEngine.getVolume(); 
         int fillW = (int) (sliderW * currentVol);
         
-        g2.setColor(Color.decode("#1DB954")); // Green accent color
+        g2.setColor(Color.decode("#BB86FC")); // Green accent color
         g2.fillRoundRect(sliderX, sliderY, fillW, sliderH, sliderH, sliderH);
         
         // Draw Knob Indicator Handle
