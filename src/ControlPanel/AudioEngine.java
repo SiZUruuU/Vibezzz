@@ -8,47 +8,45 @@ import javax.swing.SwingUtilities;
 public class AudioEngine {
 
     private VolumeController volumeC;
-    
     private Player player;
     private Thread playerThread;
-    private boolean isPlaying = false;
-    private boolean isManuallyStopped = false; // Prevents double-skipping
+    
+    // Split states so we know if the engine is alive, paused, or killed
+    private boolean isThreadAlive = false; 
+    private boolean isPaused = false;
+    private boolean isManuallyStopped = false; 
     
     private String currentFilePath;
     private FileInputStream fis;
     private long totalLength = 0;
-    private long pauseLocation = 0;
+    private long seekLocation = 0; // Renamed from pauseLocation for clarity
     private float globalVolume = 1.0f;
     
-    private Runnable onTrackEnd; // Callback for when a song finishes
+    private Runnable onTrackEnd; 
 
-    // UI.java will use this to tell the engine what to do when a track finishes
     public void setTrackEndCallback(Runnable callback) {
         this.onTrackEnd = callback;
     }
 
     public void playTrack(String filePath) {
-        playTrack(filePath, false); // Default to a fresh start
+        playTrack(filePath, false); 
     }
 
-    public void playTrack(String filePath, boolean isResuming) {
+    public void playTrack(String filePath, boolean isSeeking) {
         try {
-            // FIX 1: If we are not specifically resuming, force the track to 0:00
-            if (!isResuming) {
-                pauseLocation = 0; 
+            if (!isSeeking) {
+                seekLocation = 0; 
             }
 
-            long tempPause = pauseLocation; 
+            long tempSeek = seekLocation; 
             stopTrack(); 
-            pauseLocation = tempPause;      
+            seekLocation = tempSeek;      
 
             currentFilePath = filePath;
             fis = new FileInputStream(filePath);
             
-            if (pauseLocation > 0) {
-                fis.skip(totalLength - pauseLocation);
-            } else {
-                totalLength = fis.available();
+            if (seekLocation > 0) {
+                fis.skip(totalLength - seekLocation);
             }
 
             BufferedInputStream bis = new BufferedInputStream(fis);
@@ -57,21 +55,31 @@ public class AudioEngine {
             volumeC.setVolume(globalVolume);
             player = new Player(bis, volumeC);
 
+            if (seekLocation <= 0) {
+                totalLength = fis.available();
+            }
 
-            isPlaying = true;
-            isManuallyStopped = false; // Reset the flag before playing
+            isThreadAlive = true;
+            isPaused = false;
+            isManuallyStopped = false; 
 
             playerThread = new Thread(() -> {
                 try {
-                    player.play(); // This blocks the thread until the song finishes or is closed
+
+                    while (isThreadAlive && !isManuallyStopped) {
+                        if (isPaused) {
+                            Thread.sleep(5); 
+                        } else {
+                            if (!player.play(1)) {
+                                break; 
+                            }
+                        }
+                    }
                     
-                    // FIX 2: If the song finished naturally (not skipped or paused)
                     if (player.isComplete() && !isManuallyStopped) {
-                        isPlaying = false;
-                        pauseLocation = 0;
-                        
+                        isThreadAlive = false;
+                        seekLocation = 0;
                         if (onTrackEnd != null) {
-                            // Safely trigger the UI skip button from the background thread
                             SwingUtilities.invokeLater(onTrackEnd);
                         }
                     }
@@ -88,39 +96,34 @@ public class AudioEngine {
     }
 
     public void pauseTrack() {
-        if (player != null && isPlaying) {
-            try {
-                pauseLocation = fis.available(); 
-                isManuallyStopped = true;
-                player.close();
-                isPlaying = false;
-                if (playerThread != null) playerThread.interrupt();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (player != null && isThreadAlive && !isPaused) {
+            isPaused = true;
+            if (volumeC != null) volumeC.pauseHardware(); // Instantly mute the OS buffer
         }
     }
 
     public void resumeTrack() {
-        if (currentFilePath != null && !isPlaying) {
-            // Tell the engine we are explicitly resuming so it doesn't reset to 0
-            playTrack(currentFilePath, true); 
+        if (player != null && isThreadAlive && isPaused) {
+            isPaused = false;
+            if (volumeC != null) volumeC.resumeHardware(); // Instantly wake the OS buffer
         }
     }
 
     public void stopTrack() {
         if (player != null) {
             isManuallyStopped = true;
+            isThreadAlive = false;
+            isPaused = false;
             player.close();
-            pauseLocation = 0;
-            isPlaying = false;
             if (playerThread != null) playerThread.interrupt();
         }
     }
 
     public double getProgress() {
-        if (fis == null || totalLength <= 0) return 0.0;
+        if (totalLength <= 0 || fis == null) return 0.0;
+        
         try {
+            // Because we never destroy the stream on pause, this math is now always 100% accurate!
             return (double) (totalLength - fis.available()) / totalLength;
         } catch (Exception e) {
             return 0.0;
@@ -131,23 +134,26 @@ public class AudioEngine {
         if (currentFilePath == null || totalLength <= 0) return;
         
         percentage = Math.max(0.0, Math.min(1.0, percentage)); 
-        pauseLocation = (long) (totalLength * (1.0 - percentage));
+        seekLocation = (long) (totalLength * (1.0 - percentage));
         
-        if (pauseLocation <= 0) pauseLocation = 1; 
+        if (seekLocation <= 0) seekLocation = 1; 
         
         playTrack(currentFilePath, true); 
     }
 
-    public boolean isPlaying() { return isPlaying; }
+    // Keeps UI in sync (e.g., changes Play icon to Pause icon)
+    public boolean isPlaying() { 
+        return isThreadAlive && !isPaused; 
+    }
 
     public void setVolume(float volume) {
-    this.globalVolume = volume;
-    if (volumeC != null) {
-        volumeC.setVolume(volume);
+        this.globalVolume = volume;
+        if (volumeC != null) {
+            volumeC.setVolume(volume);
+        }
     }
-}
 
     public float getVolume() {
         return this.globalVolume;
-}
+    }
 }

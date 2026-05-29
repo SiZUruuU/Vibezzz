@@ -4,7 +4,6 @@ import ControlPanel.Song;
 import java.awt.*;
 import java.util.ArrayList;
 
-
 public class LibraryView {
 
     public static void draw(Graphics2D g2, UI ui, int w, int h) {
@@ -101,8 +100,8 @@ public class LibraryView {
         g2.setColor(Color.decode("#2B2D31"));
         g2.fillRoundRect(pad, contentY, leftW, contentH, 30, 30);
 
-        // Map the Add Folder Hitbox to the top left text area
-        if (ui.addFolderButton != null) ui.addFolderButton.setBounds(pad + 20, contentY + 10, 150, 30);
+        // FIX: Map the Add Folder Hitbox accurately over the text coordinates
+        if (ui.addFolderButton != null) ui.addFolderButton.setBounds(pad + 145, contentY + 22, 80, 18);
 
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Inter", Font.BOLD, 18));
@@ -132,8 +131,8 @@ public class LibraryView {
                  leftW - 50,
                  totalContentHeight
             );
-        
         }
+        
         g2.setClip(pad + 10, listStartY - 20, leftW - 20, ui.libraryViewportH + 15);
 
         g2.setFont(new Font("Inter", Font.PLAIN, 13));
@@ -146,22 +145,19 @@ public class LibraryView {
                 : null;
 
         for (int i = 0; i < playlist.size(); i++) {
-            // Stop drawing if we reach the bottom of the container (No scrolling yet)
            int currentRenderY = listStartY + (i * rowHeight) - ui.scrollOffset;
             
             Song s = playlist.get(i);
             String rawDisplay = String.format("%d.  %s - %s   [%s]", (i + 1), s.getTitle(), s.getArtist(), s.getDuration());
-            String safeDisplay = UI.getClampedText(g2, rawDisplay, maxTextWidth);
 
             // Highlight the currently playing song in Spotify Green (compare by object, not index)
             if (s == nowPlaying) g2.setColor(Color.decode("#1DB954"));
             else g2.setColor(Color.WHITE);
 
-            g2.drawString(safeDisplay, pad + 25, currentRenderY);
+            // FIX: Render smoothly with Ping-Pong Marquee
+            ui.drawMarqueeText(g2, rawDisplay, pad + 25, currentRenderY, maxTextWidth);
         }
         g2.setClip(originalClip);
-
-
 
         // 3. PLAYLISTS CONTAINER
         g2.setColor(Color.decode("#2B2D31"));
@@ -196,6 +192,7 @@ public class LibraryView {
                 }
             }
         }
+        
         if (ui.insidePlaylistView) {
             ArrayList<ControlPanel.Song> songs = ui.playlistSongs.get(ui.selectedPlaylistName);
             if (songs != null) {
@@ -212,7 +209,6 @@ public class LibraryView {
         }
 
         // Drawing for buttons and text
-
         if (ui.insidePlaylistView) {
             g2.setColor(Color.GRAY);
             g2.setFont(new Font("Inter", Font.BOLD, 12));
@@ -233,6 +229,7 @@ public class LibraryView {
                 g2.drawString((i + 1) + ".  " + ui.createdPlaylists.get(i), rightX + 25, contentY + 70 + (i * 25));
             }
         }
+        
         if (ui.insidePlaylistView) {
             // Draw the "Add Song" button label
             g2.setColor(Color.WHITE);
@@ -247,7 +244,6 @@ public class LibraryView {
             }
         }
 
-        // In LibraryView.java
         // Offsetter
         int pIdx = 0;
         int verticalOffset = 10;
@@ -255,31 +251,26 @@ public class LibraryView {
             if (btn instanceof ControlPanel.Buttons.PlaylistClicker) {
                 if (!ui.insidePlaylistView) {
                     int yPos = contentY + 70 + (pIdx * 25) - verticalOffset;
-
                     btn.setBounds(rightX, yPos, rightW, 20);
                     pIdx++;
                 }
             }
         }
 
-
         // 4. SETTINGS 
-
         int setX = w - pad - 28;
         int setY = searchY + (searchH - 24) / 2;
         int setW = 24;
         int setH = 24;
 
-        // 2. Inject these physical coordinates into your smart button's hitbox
+        // Inject these physical coordinates into your smart button's hitbox
         if (ui.iconSettings != null) {
-            // Pro-Tip: We subtract 4 from X/Y and add 8 to W/H to give it a slightly 
-            // larger invisible click box, making it much easier for a user to hit!
             ui.settings.setBounds(setX - 4, setY - 4, setW + 8, setH + 8);
         }
 
-        // 3. Draw the graphic using those exact same variables
+        // Draw the graphic using those exact same variables
         if (ui.iconSettings != null) {
             g2.drawImage(ui.iconSettings, setX, setY, setW, setH, null);
-            }
+        }
     }
 }

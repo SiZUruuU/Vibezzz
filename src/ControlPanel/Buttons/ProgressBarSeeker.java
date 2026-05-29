@@ -10,12 +10,19 @@ public class ProgressBarSeeker extends ButtonManager {
         super(0, 0, 0, 0, panel, ui);
     }
 
+    // NEW: Updates the visuals while dragging without glitching the audio
+    public void updateVisual(int mouseX) {
+        if (this.width == 0) return;
+        double percentage = (double) (mouseX - this.x) / this.width;
+        ui.dragProgress = Math.max(0.0, Math.min(1.0, percentage));
+        ui.panel.repaint();
+    }
+
     @Override
     public void execute(int mouseX, int mouseY) {
         if (!ui.musicHandler.getPlaylist().isEmpty() && ui.audioEngine.isPlaying()) {
-            // Because we passed mouseX, the button handles its own complex math!
             double percentage = (double) (mouseX - this.x) / this.width;
-            ui.audioEngine.seek(percentage);
+            ui.audioEngine.seek(Math.max(0.0, Math.min(1.0, percentage)));
         }
     }
 }

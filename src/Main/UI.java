@@ -5,7 +5,6 @@ import ControlPanel.ButtonManager;
 import ControlPanel.Buttons.*;
 import ControlPanel.MusicHandler; // Assumes you created the specific button classes here
 import java.awt.*;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.Timer;
@@ -15,6 +14,9 @@ public class UI {
     public Panel panel;
     public boolean exit = false;
     public boolean escInq = false;
+    public boolean isDraggingProgress = false;
+    public double dragProgress = 0.0;
+    public int marqueeTick = 0;
 
     // --- BUTTON LISTS FOR MOUSEHANDLER ---
     public ArrayList<ButtonManager> backEndButtons = new ArrayList<>();
@@ -75,11 +77,10 @@ public class UI {
         loadAssets();
         initializeButtons();
 
-        // Repaint loop for the progress bar animation
+        // Repaint loop for the progress bar and marquee animations
         Timer timer = new Timer(50, e -> {
-            if (audioEngine.isPlaying()) {
-                panel.repaint();
-            }
+            marqueeTick++;
+            panel.repaint(); // Always repaint to keep marquee moving
         });
         timer.start();
     }
@@ -164,6 +165,14 @@ public class UI {
         if (exit) {
             PopupView.draw(g2, this, w, h);
         }
+
+        //Debugger
+        for (ButtonManager btn : backEndButtons) {
+                if (btn != null) btn.drawDebug(g2);
+            }
+
+
+
     }
 
     // Add this method to UI.java
@@ -230,33 +239,38 @@ public class UI {
         g2.drawString(text, boxX + padding, boxY + 21); 
     }
 
-    public static String getClampedText(Graphics2D g2, String text, int maxWidth) {
-        if (text == null || text.isEmpty()) return "";
-
+    public void drawMarqueeText(Graphics2D g2, String text, int x, int y, int maxW) {
         FontMetrics fm = g2.getFontMetrics();
-    
-        // If the text naturally fits inside the allowed boundary, return it as-is
-        if (fm.stringWidth(text) <= maxWidth) {
-        return text;
+        int textW = fm.stringWidth(text);
+
+        if (textW <= maxW) {
+            g2.drawString(text, x, y);
+            return;
         }
-    
-        String ellipsis = "...";
-        int ellipsisWidth = fm.stringWidth(ellipsis);
-    
-        // Safety check: if the column is narrower than the ellipsis itself, return empty
-        if (maxWidth <= ellipsisWidth) return "";
-    
-        // Build the string up character by character until it hits the limit
-        StringBuilder truncated = new StringBuilder();
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            // Test if adding the next character + the ellipsis exceeds our boundary
-            if (fm.stringWidth(truncated.toString() + c + ellipsis) > maxWidth) {
-            break;
-            }
-            truncated.append(c);
+
+        int overflow = textW - maxW;
+        int cycle = overflow + 100; // Adds a 50px delay at start and end
+        int offset = (marqueeTick / 2) % (cycle * 2); 
+
+        // Ping-pong math
+        int shift = 0;
+        if (offset > 50 && offset <= 50 + overflow) {
+            shift = offset - 50;
+        } else if (offset > 50 + overflow && offset <= 100 + overflow) {
+            shift = overflow;
+        } else if (offset > 100 + overflow && offset <= 100 + overflow * 2) {
+            shift = overflow - (offset - (100 + overflow));
         }
-    
-        return truncated.toString() + ellipsis;
+
+        Shape oldClip = g2.getClip(); 
+        
+        // FIX: Use clipRect() to INTERSECT with the LibraryView's scroll limits
+        // instead of setClip() which was completely overriding them!
+        g2.clipRect(x, y - fm.getAscent(), maxW, fm.getHeight() + 10);
+        
+        g2.drawString(text, x - shift, y);
+        
+        // Restores the original limits after drawing this one string
+        g2.setClip(oldClip); 
     }
 }

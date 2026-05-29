@@ -17,12 +17,9 @@ public class KeyInputHandler implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        
-        //Search Bar
-        if(!ui.searchBarFocused) {return;}
+        if(!ui.searchBarFocused) return;
         
         char c = e.getKeyChar();
-
         if (Character.isLetterOrDigit(c) || Character.isWhitespace(c)) {            
                 ui.searchText += c;
                 panel.repaint();
@@ -31,15 +28,14 @@ public class KeyInputHandler implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-
-        if(!ui.searchBarFocused) {return;}
-        
         int code = e.getKeyCode();
         
         if(code == KeyEvent.VK_ESCAPE){
             panel.exitInquiry();
         }
 
+        if(!ui.searchBarFocused) return;
+        
         if(code == KeyEvent.VK_BACK_SPACE && !ui.searchText.isEmpty()) {
             ui.searchText = ui.searchText.substring(0, ui.searchText.length() - 1);
             panel.repaint();
@@ -47,8 +43,5 @@ public class KeyInputHandler implements KeyListener {
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
-
-    }
-    
+    public void keyReleased(KeyEvent e) {}
 }

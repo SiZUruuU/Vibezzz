@@ -61,14 +61,25 @@ public class PlayerView {
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Inter", Font.BOLD, 16));
         FontMetrics fmTitle = g2.getFontMetrics();
+        
         int titleW = fmTitle.stringWidth(trackTitle);
         int songIconSize = 16;
         int songIconGap = 8;
-        int totalRowW = songIconSize + songIconGap + titleW;
-        int rowX = rightX + (rightW - totalRowW) / 2;
+        int maxTitleW = rightW - 60; // Max allowed width before scrolling kicks in
+        
+        int rowX;
+        
+        // FIX: Dynamically anchor left if scrolling, or center if short
+        if (titleW > maxTitleW) {
+            rowX = rightX + 30; 
+        } else {
+            int totalRowW = songIconSize + songIconGap + titleW;
+            rowX = rightX + (rightW - totalRowW) / 2; 
+        }
 
         if (ui.iconSong != null) g2.drawImage(ui.iconSong, rowX, titleY - 14, songIconSize, songIconSize, null);
-        g2.drawString(trackTitle, rowX + songIconSize + songIconGap, titleY);
+        
+        ui.drawMarqueeText(g2, trackTitle, rowX + songIconSize + songIconGap, titleY, maxTitleW);
 
         g2.setColor(Color.GRAY);
         g2.setFont(new Font("Inter", Font.PLAIN, 12));
@@ -80,12 +91,12 @@ public class PlayerView {
         int barX = artX;
         int barY = titleY + 36;
         
-        // Tell the Seeker object where it is on the screen so it can be clicked
         if (ui.progressBarSeeker != null) ui.progressBarSeeker.setBounds(barX, barY - 10, barW, 24); 
-
         if (ui.imgProgressBar != null) g2.drawImage(ui.imgProgressBar, barX, barY, barW, 4, null);
-        double progress = ui.audioEngine.getProgress();
+        
+        double progress = ui.isDraggingProgress ? ui.dragProgress : ui.audioEngine.getProgress();
         int knobX = barX + (int)(barW * progress) - 6; 
+        
         if (ui.imgProgressKnob != null) g2.drawImage(ui.imgProgressKnob, knobX, barY - 4, 12, 12, null);
 
         // AUDIO CONTROLS
@@ -100,7 +111,6 @@ public class PlayerView {
                 int cx = rightX + 25 + i * (iconWidth + spacing);
                 Image iconToDraw = controls[i];
                 
-                // Set bounds for each smart button dynamically
                 if (i == 0) { 
                     if(ui.repeatButton != null) ui.repeatButton.setBounds(cx, ctrlY, iconWidth, iconWidth);
                     if (ui.isRepeat) {
@@ -125,6 +135,5 @@ public class PlayerView {
                 g2.drawImage(iconToDraw, cx, ctrlY, iconWidth, iconWidth, null);
             }
         }
-
-        }
     }
+}

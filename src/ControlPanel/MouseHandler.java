@@ -9,7 +9,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-
 import javax.swing.SwingUtilities;
 
 // Implement MouseMotionListener here
@@ -67,38 +66,49 @@ public class MouseHandler implements MouseListener, MouseMotionListener, MouseWh
             ui.isDraggingVolume = true;
             ui.volumeSlider.updateVolume(e.getX()); 
         }
+
+        // FIX: Detect Progress Bar Grab
+        if (ui.progressBarSeeker != null && ui.progressBarSeeker.collisionCheck(e.getX(), e.getY())) {
+            ui.isDraggingProgress = true;
+            ((ControlPanel.Buttons.ProgressBarSeeker) ui.progressBarSeeker).updateVisual(e.getX());
+        }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         if (ui.isDraggingVolume && ui.volumeSlider != null) {
             ui.volumeSlider.updateVolume(e.getX());
-            return; // Kills your custom window-dragging code below while adjusting volume
+            return; 
+        }
+
+        // FIX: Drag progress visually
+        if (ui.isDraggingProgress && ui.progressBarSeeker != null) {
+            ((ControlPanel.Buttons.ProgressBarSeeker) ui.progressBarSeeker).updateVisual(e.getX());
+            return;
         }
 
         if (initialClick == null) return;
         Window window = SwingUtilities.getWindowAncestor(panel);
        
-        if(cursorOnTop){
-            if (window != null) {
-
-                int windowX = window.getLocation().x;
-                int windowY = window.getLocation().y;
-
-                int xMoved = e.getX() - initialClick.x;
-                int yMoved = e.getY() - initialClick.y;
-
-
-                window.setLocation(windowX + xMoved, windowY + yMoved);
-            }
+        if(cursorOnTop && window != null){
+            int windowX = window.getLocation().x;
+            int windowY = window.getLocation().y;
+            int xMoved = e.getX() - initialClick.x;
+            int yMoved = e.getY() - initialClick.y;
+            window.setLocation(windowX + xMoved, windowY + yMoved);
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
-        initialClick = null; //
+        initialClick = null; 
         ui.isDraggingVolume = false;
+
+        // FIX: Actually seek the audio file when they let go of the mouse
+        if (ui.isDraggingProgress) {
+            ui.isDraggingProgress = false;
+            ui.audioEngine.seek(ui.dragProgress);
+        }
     }
 
     @Override
