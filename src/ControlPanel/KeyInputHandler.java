@@ -17,6 +17,10 @@ public class KeyInputHandler implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
+        
+        //Search Bar
+        if(!ui.searchBarFocused) {return;}
+        
         char c = e.getKeyChar();
 
         if (Character.isLetterOrDigit(c) || Character.isWhitespace(c)) {            
@@ -28,8 +32,10 @@ public class KeyInputHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
 
+        if(!ui.searchBarFocused) {return;}
+        
         int code = e.getKeyCode();
-
+        
         if(code == KeyEvent.VK_ESCAPE){
             panel.exitInquiry();
         }
