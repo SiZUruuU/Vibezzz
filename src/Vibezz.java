@@ -2,7 +2,7 @@ import Main.Panel;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JFrame;
 
-public class Vibezz{
+public class Vibezz {
     public static void main(String [] args){
 
         JFrame jframe = new JFrame();
