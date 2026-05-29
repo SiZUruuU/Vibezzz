@@ -110,4 +110,26 @@ public class MusicHandler {
     }
 
     public ArrayList<Song> getPlaylist() { return playlist; }
+
+    // For Search Bar
+    public ArrayList<Song> searchSongs(String query) {
+
+        if (query == null || query.trim().isEmpty()) {
+            return playlist;
+        }
+
+        ArrayList<Song> results = new ArrayList<>();
+        String search = query.toLowerCase().trim();
+
+        for (Song song : playlist) {
+
+            if (song.getTitle().toLowerCase().contains(search)
+                   || song.getArtist().toLowerCase().contains(search)) {
+
+                results.add(song);
+            }
+        }
+
+        return results;
+    }
 }
