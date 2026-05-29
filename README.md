@@ -1,21 +1,59 @@
-## Getting Started
+Vibezz is a custom desktop media player built from scratch using Java Swing and the JLayer audio library.
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Music playback is handled by the JLayer library.
 
-## Folder Structure
+Basic track information (Title, Artist, and Duration) is read using Java's native javax.sound.sampled.AudioSystem. When a user selects a music folder, the app scans the directory, reads these properties, and converts the microsecond durations into standard MM:SS string formats.
 
-The workspace contains two folders by default, where:
+Instead of relying on an external library for album art, the app uses a custom binary parser built with java.io.RandomAccessFile. It opens the MP3 file at the byte level, reads the ID3v2 headers (calculating sync-safe integers), and hunts down the APIC (Attached Picture) frame. Once the raw image bytes are extracted, javax.imageio.ImageIO loads the image into memory and mathematically crops it into a perfect 1:1 square before caching it locally.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+The entire interface is drawn from scratch using standard Java Swing (JPanel and Graphics2D). Instead of attaching individual action listeners to dozens of buttons (which bloats memory), the app uses a single global MouseHandler. This handler tracks raw X/Y coordinates and uses basic collision math to route clicks, scroll events, and window drags to the appropriate custom hitboxes based on the current UI state.
 
 
-BTW: if UnsupportedAudioFileException just expand the Java Projects tab under VIBEZZPROJECT got to Referenced Libraries and add the three libraries in the lib foldergi
+
+Unadded Features:
+1. Delete Playlist (we forgot)
+2. Lyrics Reader (lrc files/embedded)
+3. Overall a better interface
+4. Intro Sequence with branding (we did not know how to do art)
+
+Ai: Used Ai especially for the UI and library usage, the overall structure was made by humans.
+
+File Overview:
+
+Codebase is separated into the backend (control panel) and the rendering pipeline (Main)
+
+---Control panel---
+- Handles all file persistence, audio, and data manipulation
+
+AudioEngine: It runs the JLayer audio player on a background thread so the app never freezes while music is playing. This is how it figures out where you are in a song.
+
+MusicHandler: Scans the files, uses ID3v2 parser to rip embedded metadata and saves the playlists
+
+VolumeController: Handles volume, also why the player can press pause without too much delay
+
+Song: Holds the track data for the app
+
+---Inputs/Buttons---
+
+UI: It keeps track of what you can see: whats playing, where you click, and connects it to the right button
+
+MouseHandler: handles mouse inputs
+
+KeyInputHandler: Keyboard inputs
+
+ButtonManager: Draws the hitboxes 
+
+Buttons and Views: Holds the logic for the buttons and draws the specific windows (ps views is in the same package as main because java was being annoying and couldnt read the rest of the files while inside another subfolder.)
+
+
+How to run the app
+
+Download the Music Playlist File - Extract it
+Make sure the libraries are loaded - those 3 in the lib folder
+vscode: you can check this by going to the editors and looking at java projects - Referenced Libraries to see if they are inside
+
+Run Vibezz.java
+Library - Add Folder
+Select the music folder
+Wait for the metadata to load
+Done!
