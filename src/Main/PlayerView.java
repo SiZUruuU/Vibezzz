@@ -86,9 +86,7 @@ public class PlayerView {
         
         int rowX;
         
-        // Dynamic Anchoring: 
-        // If the title is too long, snap it to the left so the marquee scroll looks natural.
-        // If the title is short, calculate the exact width to perfectly center it under the album art.
+        // Dynamic Anchoring for Title: 
         if (titleW > maxTitleW) {
             rowX = rightX + 30; 
         } else {
@@ -102,11 +100,28 @@ public class PlayerView {
         // Pass to the custom UI method to draw the string (handling the marquee scroll if needed)
         ui.drawMarqueeText(g2, trackTitle, rowX + songIconSize + songIconGap, titleY, maxTitleW);
 
-        // Draw the Artist name centered directly below the Title
+
+        // --- UPDATED ARTIST TEXT LOGIC ---
         g2.setColor(Color.GRAY);
         g2.setFont(new Font("Inter", Font.PLAIN, 12));
         FontMetrics fmArtist = g2.getFontMetrics();
-        g2.drawString(artistName, rightX + (rightW - fmArtist.stringWidth(artistName)) / 2, titleY + 18);
+        
+        int artistW = fmArtist.stringWidth(artistName);
+        int maxArtistW = rightW - 60; // Keep the same boundary safe-zone as the title above it
+        int artistX;
+        
+        // Dynamic Anchoring for Artist:
+        if (artistW > maxArtistW) {
+            // If it's too long, anchor it to the left edge of the safe zone so it scrolls cleanly
+            artistX = rightX + 30;
+        } else {
+            // If it fits, mathematically center it perfectly under the album art
+            artistX = rightX + (rightW - artistW) / 2;
+        }
+        
+        // Pass the artist string to the scrolling text handler!
+        ui.drawMarqueeText(g2, artistName, artistX, titleY + 18, maxArtistW);
+
 
         // 5. PROGRESS BAR (SEEKER)
         int barW = artSize;
